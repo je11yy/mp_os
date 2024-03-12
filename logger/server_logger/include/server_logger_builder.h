@@ -23,8 +23,6 @@
 class server_logger_builder final:
     public logger_builder
 {
-
-    friend class server_logger_builder;
     
     std::map<std::string, std::pair<key_t, std::set<logger::severity>>> _logs;
 

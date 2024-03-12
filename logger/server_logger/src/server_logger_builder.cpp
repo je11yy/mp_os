@@ -54,7 +54,7 @@ logger_builder * server_logger_builder::add_console_stream(logger::severity seve
 logger_builder * server_logger_builder::transform_with_configuration(std::string const &configuration_file_path, std::string const &configuration_path)
 {
     nlohmann::json configuration;
-    std::ifstream configuration_file(configuration_file_path);
+    std::ifstream configuration_file(configuration_file_path, std::ios::binary);
     configuration_file >> configuration;
 
     key_t key;

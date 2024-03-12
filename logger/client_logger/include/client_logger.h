@@ -7,28 +7,26 @@
 class client_logger final:
     public logger
 {
+    
+    friend class client_logger_builder;
+
+    client_logger(std::map<std::string, std::set<logger::severity>> streams);
 
 public:
 
-    client_logger(
-        client_logger const &other);
+    client_logger(client_logger const &other);
 
-    client_logger &operator=(
-        client_logger const &other);
+    client_logger &operator=(client_logger const &other);
 
-    client_logger(
-        client_logger &&other) noexcept;
+    client_logger(client_logger &&other) noexcept;
 
-    client_logger &operator=(
-        client_logger &&other) noexcept;
+    client_logger &operator=(client_logger &&other) noexcept;
 
     ~client_logger() noexcept final;
 
 public:
 
-    [[nodiscard]] logger const *log(
-        const std::string &message,
-        logger::severity severity) const noexcept override;
+    [[nodiscard]] logger const *log(const std::string &message, logger::severity severity) const noexcept override;
 
 };
 
