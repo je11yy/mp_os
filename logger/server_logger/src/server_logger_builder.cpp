@@ -27,9 +27,53 @@ logger_builder * server_logger_builder::add_console_stream(logger::severity seve
     return this;
 }
 
+
+/*
+формат файла:
+{
+    "files" :
+    [
+        [
+            "file1",
+            [
+                "WARNING",
+                "DEBUG"
+            ]
+        ],
+        
+        [
+            "file2",
+            [
+                "WARNING",
+                "ERROR"
+            ]
+        ]
+    ]   
+}
+*/
 logger_builder * server_logger_builder::transform_with_configuration(std::string const &configuration_file_path, std::string const &configuration_path)
 {
-    throw not_implemented("logger_builder* server_logger_builder::transform_with_configuration(std::string const &configuration_file_path, std::string const &configuration_path)", "your code should be here...");
+    nlohmann::json configuration;
+    std::ifstream configuration_file(configuration_file_path);
+    configuration_file >> configuration;
+
+    key_t key;
+    std::string file_name;
+    std::string string_severity;
+    logger::severity logger_severity;
+
+    for (auto & file : configuration[configuration_path])
+    {
+        file_name = file[0];
+        key = ftok(file_name.c_str(), 'r');
+        _logs[file_name].first = key;
+        for (auto & severity : file[1])
+        {
+            string_severity = severity;
+            logger_severity = string_to_severity(string_severity);
+            _logs[file_name].second.insert(logger_severity);
+        }
+    }
 }
 
 logger_builder * server_logger_builder::clear()

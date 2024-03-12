@@ -1,6 +1,9 @@
 #ifndef MATH_PRACTICE_AND_OPERATING_SYSTEMS_SERVER_LOGGER_BUILDER_H
 #define MATH_PRACTICE_AND_OPERATING_SYSTEMS_SERVER_LOGGER_BUILDER_H
 
+#include <nlohmann/json.hpp>
+#include <fstream>
+
 #include <sys/ipc.h>
 #include <sys/msg.h>
 

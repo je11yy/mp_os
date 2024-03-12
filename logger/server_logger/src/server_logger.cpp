@@ -57,11 +57,12 @@ logger const *server_logger::log(const std::string &text, logger::severity sever
     info_msg.info = pair_for_msg;
 
 
-    message * messages = new message[packets_count];
-    // проверка?
+    message messages[packets_count];
+
     for (int i = 0; i < packets_count; ++i)
     {
-        strcpy(messages[i].text, text.substr(i * 1024, 1024).c_str());
+        if (i != packets_count - 1) strcpy(messages[i].text, text.substr(i * 1024, 1024).c_str());
+        else strcpy(messages[i].text, text.substr(i * 1024).c_str());
         messages[i].type = 1;
     }
 

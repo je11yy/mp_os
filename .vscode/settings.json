@@ -51,6 +51,11 @@
         "fstream": "cpp",
         "map": "cpp",
         "set": "cpp",
-        "cstring": "cpp"
+        "cstring": "cpp",
+        "chrono": "cpp",
+        "codecvt": "cpp",
+        "forward_list": "cpp",
+        "ratio": "cpp",
+        "valarray": "cpp"
     }
 }
