@@ -23,6 +23,12 @@ class client_logger_builder final:
 
     std::map<std::string, std::set<logger::severity>> _streams;
 
+    std::string _format;
+
+public:
+
+    logger_builder * set_format(std::string format);
+
 public:
 
     client_logger_builder();

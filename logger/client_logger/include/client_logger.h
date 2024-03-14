@@ -10,7 +10,13 @@ class client_logger final:
     
     friend class client_logger_builder;
 
-    client_logger(std::map<std::string, std::set<logger::severity>> streams);
+    std::string _format;
+
+    std::map<std::string, std::set<logger::severity>> _streams;
+    
+    static std::map<std::string, std::pair<std::ofstream, int>> _streams_users;
+
+    client_logger(std::map<std::string, std::set<logger::severity>> streams, std::string format);
 
 public:
 

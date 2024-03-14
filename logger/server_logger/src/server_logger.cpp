@@ -13,14 +13,11 @@ server_logger::server_logger(std::map<std::string, std::pair<key_t, std::set<log
         {
             if ((new_queue = msgget(pair.first, 0666 | IPC_CREAT)) < 0) throw opening_queue_error;
             _queues_users[file].first = new_queue; // установка id очереди
-            _queues_users[file].second = 1; // установка количества юзеров
-            _queues[file].first = new_queue;
         }
-        else 
-        {
-            (_queues_users[file].second)++;
-            _queues[file].first = new_queue;
-        }
+        new_queue = _queues_users[file].first;
+        _queues[file].second = pair.second;
+        _queues[file].first = new_queue;
+        (_queues_users[file].second)++; // установка количества юзеров
     }
 }
 
@@ -37,7 +34,6 @@ server_logger::~server_logger() noexcept
     for (auto &[file, pair] : _queues)
     {
         // закрытие очереди
-        if (_queues_users[file].second == 0) continue;
         if (!--_queues_users[file].second) msgctl(pair.first, IPC_RMID, 0);
     }
 }

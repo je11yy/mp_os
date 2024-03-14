@@ -2,7 +2,10 @@
 
 #include "../include/client_logger_builder.h"
 
-client_logger_builder::client_logger_builder() = default;
+client_logger_builder::client_logger_builder()
+{
+    _format = "[%s] %m";
+}
 
 client_logger_builder::client_logger_builder(client_logger_builder const &other) = default;
 
@@ -86,5 +89,11 @@ logger_builder *client_logger_builder::clear()
 
 logger *client_logger_builder::build() const
 {
-    return new client_logger(_streams);
+    return new client_logger(_streams, _format);
+}
+
+logger_builder *client_logger_builder::set_format(std::string format)
+{
+    _format = format;
+    return this;
 }
