@@ -40,7 +40,7 @@ server_logger::~server_logger() noexcept
 
 logger const *server_logger::log(const std::string &text, logger::severity severity) const noexcept
 {
-    int packets_count = sizeof(text)/1024 + 1;
+    int packets_count = text.size()/1024 + 1;
 
     // нужно передать: количество пакетов, severity и само сообщение пакетами
     // в первом сообщении будет количество пакетов и тип логирования (info_message), а последующие сообщения - части сообщения (message)
