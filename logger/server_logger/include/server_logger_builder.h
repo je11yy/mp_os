@@ -4,11 +4,11 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 
-#include <sys/ipc.h>
-#include <sys/msg.h>
+#include <unistd.h>
+#include <mqueue.h>
 
-#include <logger_builder.h>
-#include <server_logger.h>
+#include "../../logger/include/logger_builder.h"
+#include "server_logger.h"
 
 #ifdef _WIN32
     #define CONSOLE "CON"
@@ -24,7 +24,7 @@ class server_logger_builder final:
     public logger_builder
 {
     
-    std::map<std::string, std::pair<key_t, std::set<logger::severity>>> _logs;
+    std::map<std::string, std::set<logger::severity>> _logs;
 
 public:
 

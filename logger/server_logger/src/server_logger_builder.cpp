@@ -1,5 +1,3 @@
-#include <not_implemented.h>
-
 #include "../include/server_logger_builder.h"
 
 server_logger_builder::server_logger_builder() = default;
@@ -16,8 +14,7 @@ server_logger_builder::~server_logger_builder() noexcept = default;
 
 logger_builder * server_logger_builder::add_file_stream(std::string const &stream_file_path, logger::severity severity)
 {
-    if (_logs.find(stream_file_path) == _logs.end()) _logs[stream_file_path].first = ftok(stream_file_path.c_str(), 'r');
-    _logs[stream_file_path].second.insert(severity);
+    _logs[stream_file_path].insert(severity);
     return this;
 }
 
@@ -59,7 +56,6 @@ logger_builder * server_logger_builder::transform_with_configuration(std::string
     if (!configuration_file.is_open()) throw opening_file;
     configuration_file >> configuration;
 
-    key_t key;
     std::string file_name;
     std::string string_severity;
     logger::severity logger_severity;
@@ -67,20 +63,18 @@ logger_builder * server_logger_builder::transform_with_configuration(std::string
     for (auto & file : configuration[configuration_path])
     {
         file_name = file[0];
-        key = ftok(file_name.c_str(), 'r');
-        _logs[file_name].first = key;
         for (auto & severity : file[1])
         {
             string_severity = severity;
             logger_severity = string_to_severity(string_severity);
-            _logs[file_name].second.insert(logger_severity);
+            _logs[file_name].insert(logger_severity);
         }
     }
 }
 
 logger_builder * server_logger_builder::clear()
 {
-    for (auto &[file, pair] : _logs) pair.second.clear();
+    for (auto &[file, pair] : _logs) pair.clear();
     _logs.clear();
     return this;
 }

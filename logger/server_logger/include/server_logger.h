@@ -1,10 +1,11 @@
 #ifndef MATH_PRACTICE_AND_OPERATING_SYSTEMS_SERVER_LOGGER_H
 #define MATH_PRACTICE_AND_OPERATING_SYSTEMS_SERVER_LOGGER_H
 
-#include <logger.h>
+#include "../../logger/include/logger.h"
 #include "server_logger_builder.h"
 
 #include <cstring>
+#include <set>
 
 class server_logger final:
     public logger
@@ -14,23 +15,15 @@ class server_logger final:
 
 private:
 
-    std::map<std::string, std::pair<int, std::set<logger::severity>>> _queues; // name, (queue id, severities)
+    pid_t _process_id;
 
-    static std::map<std::string, std::pair<int, int>> _queues_users; // name, (queue id, number of users)
+    size_t mutable _request;
 
-    server_logger(std::map<std::string, std::pair<key_t, std::set<logger::severity>>> const logs);
+    std::map<std::string, std::pair<mqd_t, std::set<logger::severity>>> _queues; // name, (queue id, severities)
 
-    struct info_message
-    {
-        long type; 
-        std::pair<int, logger::severity> info; // количество пакетов и тип логирования
-    };
+    static std::map<std::string, std::pair<mqd_t, int>> _queues_users; // name, (queue id, number of users)
 
-    struct message
-    {
-        long type;
-        char text[1024];
-    };
+    server_logger(std::map<std::string, std::set<logger::severity>> const logs);
 
 public:
 
