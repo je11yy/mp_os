@@ -7,7 +7,7 @@
 #include <map>
 #include <set>
 
-#include <logger_builder.h>
+#include <../../logger/include/logger_builder.h>
 #include "client_logger.h"
 
 #ifdef _WIN32
@@ -27,7 +27,7 @@ class client_logger_builder final:
 
 public:
 
-    logger_builder * set_format(std::string format);
+    logger_builder * set_format(std::string &format);
 
 public:
 

@@ -1,6 +1,6 @@
-#include <not_implemented.h>
-
 #include "../include/client_logger.h"
+
+std::map<std::string, std::pair<std::ofstream, int>> client_logger::_streams_users = std::map<std::string, std::pair<std::ofstream, int>>();
 
 client_logger::client_logger(std::map<std::string, std::set<logger::severity>> streams, std::string format)
 {
@@ -25,7 +25,7 @@ client_logger &client_logger::operator=(client_logger const &other) = default;
 
 client_logger::client_logger(client_logger &&other) noexcept = default;
 
-client_logger &client_logger::operator=(client_logger &&other)  = default;
+client_logger &client_logger::operator=(client_logger &&other) noexcept = default;
 
 client_logger::~client_logger() noexcept
 {
@@ -71,7 +71,7 @@ logger const *client_logger::log(const std::string &text, logger::severity sever
 
     for (auto & [file_name, severities] : _streams)
     {
-        if (severities.find(severity) != severities.end()) _streams_users[file_name].first << message;
+        if (severities.find(severity) != severities.end()) _streams_users[file_name].first << message << std::endl;
     }
     return this;
 }

@@ -1,5 +1,3 @@
-#include <not_implemented.h>
-
 #include "../include/client_logger_builder.h"
 
 client_logger_builder::client_logger_builder()
@@ -79,12 +77,14 @@ logger_builder* client_logger_builder::transform_with_configuration(std::string 
             _streams[file_name].insert(logger_severity);
         }
     }
+    return this;
 }
 
 logger_builder *client_logger_builder::clear()
 {
     for (auto & file : _streams) file.second.clear();
     _streams.clear();
+    return this;
 }
 
 logger *client_logger_builder::build() const
@@ -92,8 +92,7 @@ logger *client_logger_builder::build() const
     return new client_logger(_streams, _format);
 }
 
-logger_builder *client_logger_builder::set_format(std::string format)
+logger_builder * client_logger_builder::set_format(std::string &format)
 {
     _format = format;
-    return this;
 }
