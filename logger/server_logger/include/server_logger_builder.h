@@ -12,9 +12,9 @@
 
 #ifdef _WIN32
     #define CONSOLE "CON"
+    #include <windows.h>
 #elif __linux__
     #define CONSOLE "/dev/tty"
-#else
 #endif
 
 #include <map>

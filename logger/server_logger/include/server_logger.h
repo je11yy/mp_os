@@ -19,9 +19,16 @@ private:
 
     size_t mutable _request;
 
-    std::map<std::string, std::pair<mqd_t, std::set<logger::severity>>> _queues; // name, (queue id, severities)
+    #ifdef _WIN32
+        std::map<std::string, std::pair<HANDLE, std::set<logger::severity>>> _queues; // name, (queue id, severities)
 
-    static std::map<std::string, std::pair<mqd_t, int>> _queues_users; // name, (queue id, number of users)
+        static std::map<std::string, std::pair<HANDLE, int>> _queues_users; // name, (queue id, number of users)
+    #elif __linux__
+
+        std::map<std::string, std::pair<mqd_t, std::set<logger::severity>>> _queues; // name, (queue id, severities)
+
+        static std::map<std::string, std::pair<mqd_t, int>> _queues_users; // name, (queue id, number of users)
+    #endif
 
     server_logger(std::map<std::string, std::set<logger::severity>> const logs);
 

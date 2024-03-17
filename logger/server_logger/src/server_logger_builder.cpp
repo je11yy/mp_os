@@ -14,7 +14,13 @@ server_logger_builder::~server_logger_builder() noexcept = default;
 
 logger_builder * server_logger_builder::add_file_stream(std::string const &stream_file_path, logger::severity severity)
 {
-    _logs[stream_file_path].insert(severity);
+    #ifdef _WIN32
+            std::string file = "//./pipe/";
+    #elif __linux__
+            std::string file = "/";
+    #endif
+    file += stream_file_path;
+    _logs[file].insert(severity);
     return this;
 }
 
