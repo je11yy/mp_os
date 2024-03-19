@@ -11,7 +11,7 @@ int main()
         std::string file = "//./pipe/" + file_name;
         HANDLE pipe = CreateNamedPipeA(file, PIPE_ACCESS_DUPLEX, 
         PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT | PIPE_UNLIMITED_INSTANCES, 
-        MESSAGE_SIZE, MESSAGE_SIZE, 0, nullptr);
+        PIPE_UNLIMITED_INSTANCES, MESSAGE_SIZE, MESSAGE_SIZE, 0, nullptr);
         
         if (pipe == INVALID_HANDLE_VALUE) throw opening_queue_error;
     #elif __linux__
