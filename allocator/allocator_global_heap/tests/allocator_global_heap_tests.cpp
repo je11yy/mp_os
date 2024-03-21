@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <allocator_global_heap.h>
-#include <client_logger_builder.h>
+#include <client_logger.h>
 #include <logger.h>
 #include <logger_builder.h>
 
@@ -13,20 +13,22 @@ TEST(allocatorGlobalHeapTests, test1)
         ->add_file_stream("gh_alc_test1_logs.txt", logger::severity::debug)
         ->build();
     delete logger_builder_instance;
-    
     allocator *allocator_instance = new allocator_global_heap(logger_instance);
     auto block = reinterpret_cast<int *>(allocator_instance->allocate(sizeof(unsigned char), 0));
+
     delete allocator_instance;
+    allocator_instance = nullptr;
+
     allocator *allocator_another_instance = new allocator_global_heap(logger_instance);
+
     allocator_another_instance->deallocate(block);
+
     delete allocator_another_instance;
-    
     delete logger_instance;
 }
 
 TEST(allocatorGlobalHeapTests, test2)
 {
-    
     logger_builder *logger_builder_instance = new client_logger_builder;
     
     logger *logger_instance = logger_builder_instance

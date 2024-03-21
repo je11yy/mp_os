@@ -41,8 +41,7 @@ public:
         size_t value_size,
         size_t values_count) override;
     
-    void deallocate(
-        void *at) override;
+    void deallocate(void *at) override;
 
 public:
     
