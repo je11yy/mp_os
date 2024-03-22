@@ -35,5 +35,5 @@
 cmake-build-debug/
 
 /.vscode
-/CMakeFiles
-Makefile
+**/CMakeFiles
+**Makefile
