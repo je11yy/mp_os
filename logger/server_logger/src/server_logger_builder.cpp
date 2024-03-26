@@ -30,6 +30,7 @@ logger_builder * server_logger_builder::add_file_stream(std::string const &strea
             file = stream_file_path;
         #elif _WIN32
             file = "//./pipe";
+            file += stream_file_path;
         #endif
     }
     _logs[file].insert(severity);

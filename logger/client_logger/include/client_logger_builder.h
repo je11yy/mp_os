@@ -7,8 +7,8 @@
 #include <map>
 #include <set>
 
-#include <../../logger/include/logger_builder.h>
-#include "client_logger.h"
+#include <logger_builder.h>
+#include <client_logger.h>
 
 #ifdef _WIN32
     #define CONSOLE "CON"

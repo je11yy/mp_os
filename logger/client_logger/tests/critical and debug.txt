@@ -1,0 +1,4 @@
+[CRITICAL] Critical sutuation
+
+[DEBUG] Debugging point
+

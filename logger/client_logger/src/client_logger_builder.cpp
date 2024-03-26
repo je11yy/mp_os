@@ -95,4 +95,5 @@ logger *client_logger_builder::build() const
 logger_builder * client_logger_builder::set_format(std::string &format)
 {
     _format = format;
+    return this;
 }

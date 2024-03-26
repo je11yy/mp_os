@@ -38,3 +38,5 @@ cmake-build-debug/
 **/CMakeFiles
 **Makefile
 *.cmake
+/_deps
+/build

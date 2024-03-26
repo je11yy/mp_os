@@ -2,7 +2,7 @@
 
 int main()
 {
-    std::string format = "[%s] [%d %t] %m";
+    // std::string format = "%s | %d | %t : %m";
     client_logger_builder * builder = new client_logger_builder;
     builder -> add_file_stream("errors.txt", logger::severity::error)
     -> add_file_stream("critical and debug.txt", logger::severity::critical)
@@ -11,7 +11,7 @@ int main()
     -> add_console_stream(logger::severity::warning)
     -> add_console_stream(logger::severity::trace);
 
-    builder -> set_format(format);
+    // builder -> set_format(format);
     logger * lgr = builder -> build();
 
     delete builder;

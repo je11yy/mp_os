@@ -78,9 +78,7 @@ protected:
 
 //region search_tree<tkey, tvalue>::node implementation
 
-template<
-    typename tkey,
-    typename tvalue>
+template<typename tkey, typename tvalue>
 search_tree<tkey, tvalue>::common_node::common_node()
 {
     throw not_implemented("template<typename tkey, typename tvalue> search_tree<tkey, tvalue>::common_node::common_node()", "your code should be here...");
