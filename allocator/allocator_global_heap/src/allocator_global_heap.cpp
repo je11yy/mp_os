@@ -41,6 +41,11 @@ allocator_global_heap &allocator_global_heap::operator=(
     debug_with_guard("[Begin] [Allocator Global Heap] Allocate function\n");
 
     block_size_t requested_size = value_size * values_count;
+    if (requested_size < sizeof(void*))
+    {
+        requested_size = sizeof(void*);
+        warning_with_guard("[Allocator Global Heap] Requested size has been changed\n");
+    }
     block_size_t meta_size = sizeof(allocator*) + sizeof(size_t);
 
     block_size_t size = requested_size + meta_size;
@@ -55,6 +60,7 @@ allocator_global_heap &allocator_global_heap::operator=(
     block_pointer_t ptr = new_block;
 
     *(reinterpret_cast<allocator **>(ptr)) = this;
+    // TODO: this is bad :(
     ptr += sizeof(allocator*);
     *(reinterpret_cast<size_t *>(ptr)) = requested_size;
 

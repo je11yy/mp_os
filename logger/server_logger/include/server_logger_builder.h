@@ -19,6 +19,7 @@
 
 #include <map>
 #include <set>
+#include <utility>
 
 class server_logger_builder final:
     public logger_builder

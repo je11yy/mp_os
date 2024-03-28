@@ -32,6 +32,8 @@ private:
 
     server_logger(std::map<std::string, std::set<logger::severity>> const logs);
 
+    void close_streams();
+
 public:
 
     server_logger(server_logger const &other);

@@ -18,6 +18,8 @@ class client_logger final:
 
     client_logger(std::map<std::string, std::set<logger::severity>> streams, std::string format);
 
+    void close_streams();
+
 public:
 
     client_logger(client_logger const &other);

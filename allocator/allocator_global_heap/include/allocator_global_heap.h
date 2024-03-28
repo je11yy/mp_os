@@ -14,7 +14,7 @@ class allocator_global_heap final:
 
 private:
     
-    logger *_logger;
+    logger *_logger = nullptr;
 
 public:
     

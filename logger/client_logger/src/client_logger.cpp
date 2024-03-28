@@ -19,20 +19,49 @@ client_logger::client_logger(std::map<std::string, std::set<logger::severity>> s
     _format = format;
 }
 
-client_logger::client_logger(client_logger const &other) = default;
+client_logger::client_logger(client_logger const &other) :
+    _format(other._format), _streams(other._streams)
+{
+    for (auto &[key, pair] : _streams_users) pair.second++;
+}
 
-client_logger &client_logger::operator=(client_logger const &other) = default;
+client_logger &client_logger::operator=(client_logger const &other)
+{
+    if (this == &other) return *this;
+    close_streams();
+    _streams = other._streams;
+    _format = other._format;
+    for (auto &[key, pair] : _streams) _streams_users[key].second++;
+    return *this;
+}
 
-client_logger::client_logger(client_logger &&other) noexcept = default;
+client_logger::client_logger(client_logger &&other) noexcept :
+    _streams(std::move(other._streams)), _format(std::move(other._format)) {}
 
-client_logger &client_logger::operator=(client_logger &&other) noexcept = default;
+client_logger &client_logger::operator=(client_logger &&other) noexcept
+{
+    if (this == &other) return *this;
+    close_streams();
+    _format = std::move(other._format);
+    _streams = std::move(other._streams);
+    return *this;
+}
 
-client_logger::~client_logger() noexcept
+void client_logger::close_streams()
 {
     for (auto &[file_name, severities] : _streams)
     {
-        if (!(--_streams_users[file_name].second)) _streams_users[file_name].first.close();
+        if ((--_streams_users[file_name].second) == 0)
+        {
+            _streams_users[file_name].first.close();
+            _streams_users.erase(file_name);
+        }
     }
+}
+
+client_logger::~client_logger() noexcept
+{
+    close_streams();
 }
 
 void replace_substring(std::string &str, const std::string &to_replace, const std::string &replace_with)

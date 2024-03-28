@@ -1,19 +1,30 @@
 #include "../include/client_logger_builder.h"
 
-client_logger_builder::client_logger_builder()
+client_logger_builder::client_logger_builder() : _format("[%s] %m\n") {}
+
+client_logger_builder::client_logger_builder(client_logger_builder const &other) :
+    _format(other._format), _streams(other._streams) {}
+
+client_logger_builder &client_logger_builder::operator=(client_logger_builder const &other)
 {
-    _format = "[%s] %m";
+    if (this == &other) return *this;
+    _streams = other._streams;
+    _format = other._format;
+    return *this;
 }
 
-client_logger_builder::client_logger_builder(client_logger_builder const &other) = default;
+client_logger_builder::client_logger_builder(client_logger_builder &&other) noexcept :
+    _streams(std::move(other._streams)), _format(std::move(other._format)) {}
 
-client_logger_builder &client_logger_builder::operator=(client_logger_builder const &other) = default;
+client_logger_builder &client_logger_builder::operator=(client_logger_builder &&other) noexcept
+{
+    if (this == &other) return *this;
+    _format = std::move(other._format);
+    _streams = std::move(other._streams);
+    return *this;
+}
 
-client_logger_builder::client_logger_builder(client_logger_builder &&other) noexcept = default;
-
-client_logger_builder &client_logger_builder::operator=(client_logger_builder &&other) noexcept = default;
-
-client_logger_builder::~client_logger_builder() noexcept = default;
+client_logger_builder::~client_logger_builder() noexcept {}
 
 logger_builder *client_logger_builder::add_file_stream(std::string const &stream_file_path, logger::severity severity)
 {

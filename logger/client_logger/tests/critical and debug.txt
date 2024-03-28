@@ -1,4 +1,4 @@
-[CRITICAL] Critical sutuation
+CRITICAL | 2024-03-28 | 17:00:13 : Critical sutuation
 
-[DEBUG] Debugging point
+DEBUG | 2024-03-28 | 17:00:13 : Debugging point
 

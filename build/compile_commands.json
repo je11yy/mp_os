@@ -1,0 +1,162 @@
+[
+{
+  "directory": "/home/jellyw00n/mp_os/build/allocator/allocator",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/allocator/allocator/./include -g -std=c++14 -o CMakeFiles/mp_os_allctr_allctr.dir/src/allocator_guardant.cpp.o -c /home/jellyw00n/mp_os/allocator/allocator/src/allocator_guardant.cpp",
+  "file": "/home/jellyw00n/mp_os/allocator/allocator/src/allocator_guardant.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/allocator/allocator",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/allocator/allocator/./include -g -std=c++14 -o CMakeFiles/mp_os_allctr_allctr.dir/src/allocator_test_utils.cpp.o -c /home/jellyw00n/mp_os/allocator/allocator/src/allocator_test_utils.cpp",
+  "file": "/home/jellyw00n/mp_os/allocator/allocator/src/allocator_test_utils.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/allocator/allocator_boundary_tags",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/allocator/allocator_boundary_tags/./include -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/allocator/allocator/./include -g -std=c++14 -o CMakeFiles/mp_os_allctr_allctr_bndr_tgs.dir/src/allocator_boundary_tags.cpp.o -c /home/jellyw00n/mp_os/allocator/allocator_boundary_tags/src/allocator_boundary_tags.cpp",
+  "file": "/home/jellyw00n/mp_os/allocator/allocator_boundary_tags/src/allocator_boundary_tags.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/allocator/allocator_boundary_tags/tests",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/client_logger/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -I/home/jellyw00n/mp_os/allocator/allocator/./include -I/home/jellyw00n/mp_os/allocator/allocator_boundary_tags/./include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -std=c++14 -o CMakeFiles/mp_os_allctr_allctr_bndr_tgs_tests.dir/allocator_boundary_tags_tests.cpp.o -c /home/jellyw00n/mp_os/allocator/allocator_boundary_tags/tests/allocator_boundary_tags_tests.cpp",
+  "file": "/home/jellyw00n/mp_os/allocator/allocator_boundary_tags/tests/allocator_boundary_tags_tests.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/_deps/googletest-build/googlemock",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/build/_deps/googletest-src/googlemock/include -I/home/jellyw00n/mp_os/build/_deps/googletest-src/googlemock -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++14 -o CMakeFiles/gmock.dir/src/gmock-all.cc.o -c /home/jellyw00n/mp_os/build/_deps/googletest-src/googlemock/src/gmock-all.cc",
+  "file": "/home/jellyw00n/mp_os/build/_deps/googletest-src/googlemock/src/gmock-all.cc"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/_deps/googletest-build/googlemock",
+  "command": "/usr/bin/g++  -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googlemock/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googlemock -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++14 -o CMakeFiles/gmock_main.dir/src/gmock_main.cc.o -c /home/jellyw00n/mp_os/build/_deps/googletest-src/googlemock/src/gmock_main.cc",
+  "file": "/home/jellyw00n/mp_os/build/_deps/googletest-src/googlemock/src/gmock_main.cc"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/_deps/googletest-build/googletest",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -I/home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++14 -o CMakeFiles/gtest.dir/src/gtest-all.cc.o -c /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/src/gtest-all.cc",
+  "file": "/home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/src/gtest-all.cc"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/_deps/googletest-build/googletest",
+  "command": "/usr/bin/g++  -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -Wall -Wshadow -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++14 -o CMakeFiles/gtest_main.dir/src/gtest_main.cc.o -c /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/src/gtest_main.cc",
+  "file": "/home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/src/gtest_main.cc"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/allocator/allocator_buddies_system",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/allocator/allocator_buddies_system/./include -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/allocator/allocator/./include -g -std=c++14 -o CMakeFiles/mp_os_allctr_allctr_bdds_sstm.dir/src/allocator_buddies_system.cpp.o -c /home/jellyw00n/mp_os/allocator/allocator_buddies_system/src/allocator_buddies_system.cpp",
+  "file": "/home/jellyw00n/mp_os/allocator/allocator_buddies_system/src/allocator_buddies_system.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/allocator/allocator_buddies_system/tests",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/client_logger/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -I/home/jellyw00n/mp_os/allocator/allocator/./include -I/home/jellyw00n/mp_os/allocator/allocator_buddies_system/./include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -std=c++14 -o CMakeFiles/mp_os_allctr_allctr_bdds_sstm_tests.dir/allocator_buddies_system_tests.cpp.o -c /home/jellyw00n/mp_os/allocator/allocator_buddies_system/tests/allocator_buddies_system_tests.cpp",
+  "file": "/home/jellyw00n/mp_os/allocator/allocator_buddies_system/tests/allocator_buddies_system_tests.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/allocator/allocator_global_heap",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/allocator/allocator_global_heap/./include -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/allocator/allocator/./include -g -std=c++14 -o CMakeFiles/mp_os_allctr_allctr_glbl_hp.dir/src/allocator_global_heap.cpp.o -c /home/jellyw00n/mp_os/allocator/allocator_global_heap/src/allocator_global_heap.cpp",
+  "file": "/home/jellyw00n/mp_os/allocator/allocator_global_heap/src/allocator_global_heap.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/allocator/allocator_global_heap/tests",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/client_logger/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -I/home/jellyw00n/mp_os/allocator/allocator/./include -I/home/jellyw00n/mp_os/allocator/allocator_global_heap/./include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -std=c++14 -o CMakeFiles/mp_os_allctr_allctr_glbl_hp_tests.dir/allocator_global_heap_tests.cpp.o -c /home/jellyw00n/mp_os/allocator/allocator_global_heap/tests/allocator_global_heap_tests.cpp",
+  "file": "/home/jellyw00n/mp_os/allocator/allocator_global_heap/tests/allocator_global_heap_tests.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/allocator/allocator_red_black_tree",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/allocator/allocator_red_black_tree/./include -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/allocator/allocator/./include -g -std=c++14 -o CMakeFiles/mp_os_allctr_allctr_rb_tr.dir/src/allocator_red_black_tree.cpp.o -c /home/jellyw00n/mp_os/allocator/allocator_red_black_tree/src/allocator_red_black_tree.cpp",
+  "file": "/home/jellyw00n/mp_os/allocator/allocator_red_black_tree/src/allocator_red_black_tree.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/allocator/allocator_red_black_tree/tests",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/client_logger/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -I/home/jellyw00n/mp_os/allocator/allocator/./include -I/home/jellyw00n/mp_os/allocator/allocator_red_black_tree/./include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -std=c++14 -o CMakeFiles/mp_os_allctr_allctr_rb_tr_tests.dir/allocator_red_black_tree_tests.cpp.o -c /home/jellyw00n/mp_os/allocator/allocator_red_black_tree/tests/allocator_red_black_tree_tests.cpp",
+  "file": "/home/jellyw00n/mp_os/allocator/allocator_red_black_tree/tests/allocator_red_black_tree_tests.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/allocator/allocator_sorted_list",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/allocator/allocator_sorted_list/./include -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/allocator/allocator/./include -g -std=c++14 -o CMakeFiles/mp_os_allctr_allctr_srtd_lst.dir/src/allocator_sorted_list.cpp.o -c /home/jellyw00n/mp_os/allocator/allocator_sorted_list/src/allocator_sorted_list.cpp",
+  "file": "/home/jellyw00n/mp_os/allocator/allocator_sorted_list/src/allocator_sorted_list.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/allocator/allocator_sorted_list/tests",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/client_logger/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -I/home/jellyw00n/mp_os/allocator/allocator/./include -I/home/jellyw00n/mp_os/allocator/allocator_sorted_list/./include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -std=c++14 -o CMakeFiles/mp_os_allctr_allctr_srtd_lst_tests.dir/allocator_sorted_list_tests.cpp.o -c /home/jellyw00n/mp_os/allocator/allocator_sorted_list/tests/allocator_sorted_list_tests.cpp",
+  "file": "/home/jellyw00n/mp_os/allocator/allocator_sorted_list/tests/allocator_sorted_list_tests.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/associative_container/search_tree/binary_search_tree/AVL_tree/tests",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/client_logger/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -I/home/jellyw00n/mp_os/associative_container/./include -I/home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/AVL_tree/./include -I/home/jellyw00n/mp_os/associative_container/search_tree/./include -I/home/jellyw00n/mp_os/allocator/allocator/./include -I/home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/./include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -std=c++14 -o CMakeFiles/mp_os_assctv_cntnr_srch_tr_bnr_srch_tr_AVL_tr_tests.dir/AVL_tree_tests.cpp.o -c /home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/AVL_tree/tests/AVL_tree_tests.cpp",
+  "file": "/home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/AVL_tree/tests/AVL_tree_tests.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/associative_container/search_tree/binary_search_tree/red_black_tree/tests",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/client_logger/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -I/home/jellyw00n/mp_os/allocator/allocator/./include -I/home/jellyw00n/mp_os/allocator/allocator_global_heap/./include -I/home/jellyw00n/mp_os/associative_container/./include -I/home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/red_black_tree/./include -I/home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/./include -I/home/jellyw00n/mp_os/associative_container/search_tree/./include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -std=c++14 -o CMakeFiles/mp_os_assctv_cntnr_srch_tr_bnr_srch_tr_rb_tr_tests.dir/red_black_tree_tests.cpp.o -c /home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/red_black_tree/tests/red_black_tree_tests.cpp",
+  "file": "/home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/red_black_tree/tests/red_black_tree_tests.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/associative_container/search_tree/binary_search_tree/scapegoat_tree/tests",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/client_logger/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -I/home/jellyw00n/mp_os/allocator/allocator/./include -I/home/jellyw00n/mp_os/allocator/allocator_global_heap/./include -I/home/jellyw00n/mp_os/associative_container/./include -I/home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/scapegoat_tree/./include -I/home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/./include -I/home/jellyw00n/mp_os/associative_container/search_tree/./include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -std=c++14 -o CMakeFiles/mp_os_assctv_cntnr_srch_tr_bnr_srch_tr_scpgt_tr_tests.dir/scapegoat_tree_tests.cpp.o -c /home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/scapegoat_tree/tests/scapegoat_tree_tests.cpp",
+  "file": "/home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/scapegoat_tree/tests/scapegoat_tree_tests.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/associative_container/search_tree/binary_search_tree/splay_tree/tests",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/client_logger/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -I/home/jellyw00n/mp_os/allocator/allocator/./include -I/home/jellyw00n/mp_os/allocator/allocator_global_heap/./include -I/home/jellyw00n/mp_os/associative_container/./include -I/home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/splay_tree/./include -I/home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/./include -I/home/jellyw00n/mp_os/associative_container/search_tree/./include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -std=c++14 -o CMakeFiles/mp_os_assctv_cntnr_srch_tr_bnr_srch_tr_spl_tr_tests.dir/splay_tree_tests.cpp.o -c /home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/splay_tree/tests/splay_tree_tests.cpp",
+  "file": "/home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/splay_tree/tests/splay_tree_tests.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/associative_container/search_tree/binary_search_tree/tests",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/logger/client_logger/./include -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -I/home/jellyw00n/mp_os/associative_container/./include -I/home/jellyw00n/mp_os/associative_container/search_tree/./include -I/home/jellyw00n/mp_os/allocator/allocator/./include -I/home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/./include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -std=c++14 -o CMakeFiles/mp_os_assctv_cntnr_srch_tr_bnr_srch_tr_tests.dir/binary_search_tree_tests.cpp.o -c /home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/tests/binary_search_tree_tests.cpp",
+  "file": "/home/jellyw00n/mp_os/associative_container/search_tree/binary_search_tree/tests/binary_search_tree_tests.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/common",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/common/./include -g -std=c++14 -o CMakeFiles/mp_os_cmmn.dir/src/not_implemented.cpp.o -c /home/jellyw00n/mp_os/common/src/not_implemented.cpp",
+  "file": "/home/jellyw00n/mp_os/common/src/not_implemented.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/common",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/common/./include -g -std=c++14 -o CMakeFiles/mp_os_cmmn.dir/src/operation_not_supported.cpp.o -c /home/jellyw00n/mp_os/common/src/operation_not_supported.cpp",
+  "file": "/home/jellyw00n/mp_os/common/src/operation_not_supported.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/logger/client_logger",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/logger/client_logger/./include -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -g -std=c++14 -o CMakeFiles/mp_os_lggr_clnt_lggr.dir/src/client_logger.cpp.o -c /home/jellyw00n/mp_os/logger/client_logger/src/client_logger.cpp",
+  "file": "/home/jellyw00n/mp_os/logger/client_logger/src/client_logger.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/logger/client_logger",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/logger/client_logger/./include -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -g -std=c++14 -o CMakeFiles/mp_os_lggr_clnt_lggr.dir/src/client_logger_builder.cpp.o -c /home/jellyw00n/mp_os/logger/client_logger/src/client_logger_builder.cpp",
+  "file": "/home/jellyw00n/mp_os/logger/client_logger/src/client_logger_builder.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/logger/client_logger/tests",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/logger/client_logger/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -std=c++14 -o CMakeFiles/mp_os_lggr_clnt_lggr_tests.dir/client_logger_tests.cpp.o -c /home/jellyw00n/mp_os/logger/client_logger/tests/client_logger_tests.cpp",
+  "file": "/home/jellyw00n/mp_os/logger/client_logger/tests/client_logger_tests.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/logger/logger",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/logger/logger/./include -g -std=c++14 -o CMakeFiles/mp_os_lggr_lggr.dir/src/logger.cpp.o -c /home/jellyw00n/mp_os/logger/logger/src/logger.cpp",
+  "file": "/home/jellyw00n/mp_os/logger/logger/src/logger.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/logger/logger",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/logger/logger/./include -g -std=c++14 -o CMakeFiles/mp_os_lggr_lggr.dir/src/logger_builder.cpp.o -c /home/jellyw00n/mp_os/logger/logger/src/logger_builder.cpp",
+  "file": "/home/jellyw00n/mp_os/logger/logger/src/logger_builder.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/logger/logger",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/logger/logger/./include -g -std=c++14 -o CMakeFiles/mp_os_lggr_lggr.dir/src/logger_guardant.cpp.o -c /home/jellyw00n/mp_os/logger/logger/src/logger_guardant.cpp",
+  "file": "/home/jellyw00n/mp_os/logger/logger/src/logger_guardant.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/logger/server_logger",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/logger/server_logger/./include -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -g -std=c++14 -o CMakeFiles/mp_os_lggr_srvr_lggr.dir/src/server_logger.cpp.o -c /home/jellyw00n/mp_os/logger/server_logger/src/server_logger.cpp",
+  "file": "/home/jellyw00n/mp_os/logger/server_logger/src/server_logger.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/logger/server_logger",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/logger/server_logger/./include -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -g -std=c++14 -o CMakeFiles/mp_os_lggr_srvr_lggr.dir/src/server_logger_builder.cpp.o -c /home/jellyw00n/mp_os/logger/server_logger/src/server_logger_builder.cpp",
+  "file": "/home/jellyw00n/mp_os/logger/server_logger/src/server_logger_builder.cpp"
+},
+{
+  "directory": "/home/jellyw00n/mp_os/build/logger/server_logger/tests",
+  "command": "/usr/bin/g++  -I/home/jellyw00n/mp_os/common/./include -I/home/jellyw00n/mp_os/logger/logger/./include -I/home/jellyw00n/mp_os/logger/server_logger/./include -I/home/jellyw00n/mp_os/build/_deps/json-src/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest/include -isystem /home/jellyw00n/mp_os/build/_deps/googletest-src/googletest -g -std=c++14 -o CMakeFiles/mp_os_lggr_srvr_lggr_tests.dir/server_logger_tests.cpp.o -c /home/jellyw00n/mp_os/logger/server_logger/tests/server_logger_tests.cpp",
+  "file": "/home/jellyw00n/mp_os/logger/server_logger/tests/server_logger_tests.cpp"
+}
+]

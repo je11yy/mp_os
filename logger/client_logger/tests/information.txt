@@ -1,2 +1,2 @@
-[INFORMATION] Info message
+INFORMATION | 2024-03-28 | 17:00:13 : Info message
 

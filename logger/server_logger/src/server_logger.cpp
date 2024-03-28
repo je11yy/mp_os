@@ -47,15 +47,34 @@ server_logger::server_logger(std::map<std::string, std::set<logger::severity>> c
     _request = 0;
 }
 
-server_logger::server_logger(server_logger const &other) = default;
 
-server_logger &server_logger::operator=(server_logger const &other) = default;
+server_logger::server_logger(server_logger const &other) :
+    _queues(other._queues)
+{
+    for (auto &[key, pair] : _queues_users) pair.second++;
+}
 
-server_logger::server_logger(server_logger &&other) noexcept = default;
+server_logger &server_logger::operator=(server_logger const &other)
+{
+    if (this == &other) return *this;
+    close_streams();
+    _queues = other._queues;
+    for (auto &[key, pair] : _queues) _queues_users[key].second++;
+    return *this;
+}
 
-server_logger &server_logger::operator=(server_logger &&other) noexcept = default;
+server_logger::server_logger(server_logger &&other) noexcept :
+    _queues(std::move(other._queues)) {}
 
-server_logger::~server_logger() noexcept
+server_logger &server_logger::operator=(server_logger &&other) noexcept
+{
+    if (this == &other) return *this;
+    close_streams();
+    _queues = std::move(other._queues);
+    return *this;
+}
+
+void server_logger::close_streams()
 {
     for (auto & [file, pair] : _queues)
     {
@@ -65,8 +84,14 @@ server_logger::~server_logger() noexcept
         #elif __linux__
             mq_close(_queues_users[file].first);
         #endif
+        _queues_users.erase(file);
 
     }
+}
+
+server_logger::~server_logger() noexcept
+{
+    close_streams();
 }
 
 logger const *server_logger::log(const std::string &text, logger::severity severity) const noexcept
