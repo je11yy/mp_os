@@ -38,6 +38,8 @@ cmake-build-debug/
 *.ignore
 Makefile
 cmake_install.cmake
-CMakeFiles/
+**/CMakeFiles
 _deps/
 CMakeCache.txt
+build/
+bin/
