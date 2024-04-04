@@ -1,3 +1,9 @@
+[DEBUG] [Begin] [Allocator Global Heap] Deallocate function
 
+
+[DEBUG] Block info: 0 0 0 0 0 0 0 0 
+
+
+[DEBUG] [End] [Allocator Global Heap] Deallocate function
 
 

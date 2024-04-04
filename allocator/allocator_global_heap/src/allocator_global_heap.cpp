@@ -19,10 +19,9 @@ allocator_global_heap::~allocator_global_heap()
 }
 
 allocator_global_heap::allocator_global_heap(
-    allocator_global_heap &&other) noexcept
+    allocator_global_heap &&other) noexcept : _logger(std::move(other._logger))
 {
     trace_with_guard("[Begin] [Allocator Global Heap] Move constructor\n");
-    _logger = std::exchange(other._logger, nullptr);
     trace_with_guard("[End] [Allocator Global Heap] Move constructor\n");
 }
 
@@ -31,7 +30,7 @@ allocator_global_heap &allocator_global_heap::operator=(
 {
     trace_with_guard("[Begin] [Allocator Global Heap] Move operator\n");
     if (this == &other) return *this;
-    std::swap(_logger, other._logger);
+    _logger =  std::move(other._logger);
     trace_with_guard("[End] [Allocator Global Heap] Move operator\n");
     return *this;
 }
@@ -50,11 +49,14 @@ allocator_global_heap &allocator_global_heap::operator=(
 
     block_size_t size = requested_size + meta_size;
 
-    block_pointer_t new_block = ::operator new(size);
-    if (new_block == nullptr)
+    block_pointer_t new_block;
+    try
+    {
+        new_block = ::operator new(size);
+    }
+    catch(std::bad_alloc const &ex)
     {
         error_with_guard("[Allocate function] Can't allocate\n");
-        throw std::bad_alloc();
     }
 
     block_pointer_t ptr = new_block;
