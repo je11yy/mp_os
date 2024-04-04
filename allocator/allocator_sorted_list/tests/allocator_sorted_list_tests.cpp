@@ -40,7 +40,7 @@ TEST(allocatorSortedListPositiveTests, test1)
     
     auto second_block = reinterpret_cast<char *>(alloc->allocate(sizeof(int), 250));
     alloc->deallocate(first_block);
-    
+
     first_block = reinterpret_cast<int *>(alloc->allocate(sizeof(int), 245));
     
     alloc->deallocate(second_block);
@@ -118,7 +118,6 @@ TEST(allocatorSortedListPositiveTests, test3)
                 break;
         }
     }
-    
     while (!allocated_blocks.empty())
     {
         auto it = allocated_blocks.begin();
@@ -127,7 +126,6 @@ TEST(allocatorSortedListPositiveTests, test3)
         allocated_blocks.erase(it);
         std::cout << "deallocation succeeded" << std::endl;
     }
-    
     //TODO: проверка
     
     delete allocator;
