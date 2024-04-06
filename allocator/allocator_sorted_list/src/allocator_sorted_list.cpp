@@ -256,7 +256,7 @@ std::string allocator_sorted_list::get_block_info(void * block) const noexcept
 {
     // состояние блока
     unsigned char * bytes = reinterpret_cast<unsigned char *>(block);
-    size_t size = get_occupied_block_size(block);
+    size_t size = get_occupied_block_size(block - sizeof(size_t) - sizeof(allocator*));
     std::string bytes_array;
     for (block_size_t i = 0; i < size; ++i)
     {
