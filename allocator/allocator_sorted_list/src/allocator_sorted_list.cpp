@@ -1,4 +1,5 @@
 #include <not_implemented.h>
+#include <cstring>
 
 #include "../include/allocator_sorted_list.h"
 
@@ -7,17 +8,22 @@ allocator_sorted_list::~allocator_sorted_list()
     std::string type = get_typename();
     std::string function = " Destructor\n";
     trace_with_guard(type + function);
-    std::cout << "HERE\n";
     deallocate_with_guard(_trusted_memory);
-    std::cout << "HERE\n";
 }
 
 allocator_sorted_list::allocator_sorted_list(
-    allocator_sorted_list const &other) : _trusted_memory(other._trusted_memory)
+    allocator_sorted_list const &other)
 {
     std::string type = get_typename();
     std::string function = " Copy constructor\n";
     trace_with_guard("[Begin] " + type + function);
+
+    deallocate_with_guard(_trusted_memory);
+    auto meta_size = sizeof(size_t) + sizeof(allocator *) + sizeof(class logger *) + sizeof(allocator_with_fit_mode::fit_mode);
+    auto size = *(reinterpret_cast<unsigned char *>(_trusted_memory) + meta_size - sizeof(size_t)) + meta_size;
+    _trusted_memory = other.allocate_with_guard(size, 1);
+    std::memcpy(_trusted_memory, other._trusted_memory, size);
+    
     trace_with_guard("[End] " + type + function);
 }
 
@@ -28,7 +34,13 @@ allocator_sorted_list &allocator_sorted_list::operator=(
     std::string function = " Copy operator\n";
     trace_with_guard("[Begin] " + type + function);
     if (this == &other) return *this;
-    _trusted_memory = other._trusted_memory;
+
+    deallocate_with_guard(_trusted_memory);
+    auto meta_size = sizeof(size_t) + sizeof(allocator *) + sizeof(class logger *) + sizeof(allocator_with_fit_mode::fit_mode);
+    auto size = *(reinterpret_cast<unsigned char *>(_trusted_memory) + meta_size - sizeof(size_t)) + meta_size;
+    _trusted_memory = other.allocate_with_guard(size, 1);
+    std::memcpy(_trusted_memory, other._trusted_memory, size);
+
     trace_with_guard("[End] " + type + function);
     return *this;
 }
@@ -205,20 +217,16 @@ allocator_sorted_list::allocator_sorted_list(
     }
     else
     {
-        std::cout << "HERE 1\n";
         if (prev_target != nullptr)
         {
-            std::cout << "HERE+\n";
             void **next_block_adress = reinterpret_cast<void **>(prev_target);
             *next_block_adress = next_target;
         }
         else
         {
-            std::cout << "HERE++\n";
             set_first_available_block(next_target);
         }
     }
-    std::cout << "HERE 2\n";
     void ** prev_adress = reinterpret_cast<void**>(block);
     prev_adress = nullptr;
     size_t * prev_size_ptr = reinterpret_cast<size_t*>(prev_adress + 1);
@@ -259,7 +267,6 @@ void allocator_sorted_list::deallocate(void *at)
 
     std::vector<allocator_test_utils::block_info> blocks_info = get_blocks_info();
     print_blocks_info(blocks_info);
-    std::cout << block_size << std::endl;
 
     void * current_available = get_first_available_block();
     void * previous_available = nullptr;
