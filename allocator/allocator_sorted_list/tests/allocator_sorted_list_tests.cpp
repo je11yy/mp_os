@@ -33,8 +33,13 @@ logger *create_logger(
 TEST(allocatorSortedListPositiveTests, test1)
 {
     //TODO: logger
+    logger_builder * builder = new client_logger_builder;
+    logger * lgr = builder -> add_console_stream(logger::severity::debug) ->
+    add_console_stream(logger::severity::error) -> add_console_stream(logger::severity::trace) ->
+    add_console_stream(logger::severity::warning) -> build();
+    // logger * lgr = nullptr;
     
-    allocator *alloc = new allocator_sorted_list(3000, nullptr, nullptr, allocator_with_fit_mode::fit_mode::first_fit);
+    allocator *alloc = new allocator_sorted_list(3000, nullptr, lgr, allocator_with_fit_mode::fit_mode::first_fit);
     
     auto first_block = reinterpret_cast<int *>(alloc->allocate(sizeof(int), 250));
     
@@ -49,14 +54,19 @@ TEST(allocatorSortedListPositiveTests, test1)
     //TODO: Проверка
     
     delete alloc;
+    delete lgr;
 }
 
 TEST(allocatorSortedListPositiveTests, test2)
 {
-    
     //TODO: logger
+    logger_builder * builder = new client_logger_builder;
+    logger * lgr = builder -> add_console_stream(logger::severity::debug) ->
+    add_console_stream(logger::severity::error) -> add_console_stream(logger::severity::trace) ->
+    add_console_stream(logger::severity::warning) -> build();
+    // logger * lgr = nullptr;
     
-    allocator *alloc = new allocator_sorted_list(3000, nullptr, nullptr,
+    allocator *alloc = new allocator_sorted_list(3000, nullptr, lgr,
         allocator_with_fit_mode::fit_mode::the_worst_fit);
     
     auto first_block = reinterpret_cast<int *>(alloc->allocate(sizeof(int), 250));
@@ -79,7 +89,13 @@ TEST(allocatorSortedListPositiveTests, test2)
 TEST(allocatorSortedListPositiveTests, test3)
 {
     //TODO: logger
-    allocator *allocator = new allocator_sorted_list(5000, nullptr, nullptr, allocator_with_fit_mode::fit_mode::first_fit);
+    logger_builder * builder = new client_logger_builder;
+    logger * lgr = builder -> add_console_stream(logger::severity::debug) ->
+    add_console_stream(logger::severity::error) -> add_console_stream(logger::severity::trace) ->
+    add_console_stream(logger::severity::warning) -> build();
+    // logger * lgr = nullptr;
+
+    allocator *allocator = new allocator_sorted_list(5000, nullptr, lgr, allocator_with_fit_mode::fit_mode::first_fit);
     
     int iterations_count = 100;
     
@@ -127,8 +143,9 @@ TEST(allocatorSortedListPositiveTests, test3)
         std::cout << "deallocation succeeded" << std::endl;
     }
     //TODO: проверка
-    
+
     delete allocator;
+    delete lgr;
     // delete logger;
     
     
@@ -137,8 +154,13 @@ TEST(allocatorSortedListPositiveTests, test3)
 TEST(allocatorSortedListPositiveTests, test4)
 {
     //TODO: logger
+    logger_builder * builder = new client_logger_builder;
+    logger * lgr = builder -> add_console_stream(logger::severity::debug) ->
+    add_console_stream(logger::severity::error) -> add_console_stream(logger::severity::trace) ->
+    add_console_stream(logger::severity::warning) -> build();
+    // logger * lgr = nullptr;
     
-    allocator *alloc = new allocator_sorted_list(1000, nullptr, nullptr, allocator_with_fit_mode::fit_mode::first_fit);
+    allocator *alloc = new allocator_sorted_list(1000, nullptr, lgr, allocator_with_fit_mode::fit_mode::first_fit);
     
     auto first_block = reinterpret_cast<unsigned char *>(alloc->allocate(sizeof(unsigned char), 250));
     auto second_block = reinterpret_cast<unsigned char *>(alloc->allocate(sizeof(char), 150));
@@ -164,7 +186,13 @@ TEST(allocatorSortedListPositiveTests, test4)
 
 TEST(allocatorSortedListPositiveTests, test5)
 {
-    allocator *alloc = new allocator_sorted_list(3000, nullptr, nullptr, allocator_with_fit_mode::fit_mode::first_fit);
+    logger_builder * builder = new client_logger_builder;
+    logger * lgr = builder -> add_console_stream(logger::severity::debug) ->
+    add_console_stream(logger::severity::error) -> add_console_stream(logger::severity::trace) ->
+    add_console_stream(logger::severity::warning) -> build();
+    // logger * lgr = nullptr;
+
+    allocator *alloc = new allocator_sorted_list(3000, nullptr, lgr, allocator_with_fit_mode::fit_mode::first_fit);
     
     auto first_block = reinterpret_cast<int *>(alloc->allocate(sizeof(int), 250));
     auto second_block = reinterpret_cast<char *>(alloc->allocate(sizeof(char), 500));

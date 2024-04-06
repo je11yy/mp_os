@@ -7,7 +7,9 @@ allocator_sorted_list::~allocator_sorted_list()
     std::string type = get_typename();
     std::string function = " Destructor\n";
     trace_with_guard(type + function);
+    std::cout << "HERE\n";
     deallocate_with_guard(_trusted_memory);
+    std::cout << "HERE\n";
 }
 
 allocator_sorted_list::allocator_sorted_list(
@@ -97,6 +99,7 @@ allocator_sorted_list::allocator_sorted_list(
 
     allocator_with_fit_mode::fit_mode * fit_mode_space_adress = reinterpret_cast<allocator_with_fit_mode::fit_mode*>(size_space_adress + 1);
     *fit_mode_space_adress = allocate_fit_mode;
+    allocator_with_fit_mode::fit_mode fit_mode = get_fit_mode();
 
     void **first_block_space_adress = reinterpret_cast<void **>(fit_mode_space_adress + 1);
     *first_block_space_adress = reinterpret_cast<void **>(first_block_space_adress + 1); // указатель на первый свободный блок
@@ -113,7 +116,6 @@ allocator_sorted_list::allocator_sorted_list(
     std::string function = " Allocate\n";
     std::string type = get_typename();
     trace_with_guard("[Begin] " + type + function);
-
 
     auto requested_size = value_size * values_count;
     if (requested_size < sizeof(void*))
@@ -178,27 +180,49 @@ allocator_sorted_list::allocator_sorted_list(
         error_with_guard(type + " Cannot allocate block\n");
         throw std::bad_alloc();
     }
-    auto blocks_sizes_difference = get_available_block_size(block) - result_size;
+    auto blocks_sizes_difference = get_available_block_size(block) - requested_size;
     if (blocks_sizes_difference > 0 && blocks_sizes_difference < meta_size)
     {
         warning_with_guard("requested space size was changed\n");
-        result_size = get_available_block_size(block);
+        requested_size = get_available_block_size(block);
+        result_size = requested_size + meta_size;
+        blocks_sizes_difference = get_available_block_size(block) - requested_size;
     }
-
-    void ** new_next = reinterpret_cast<void**>(reinterpret_cast<unsigned char *>(block) + result_size);
-    *reinterpret_cast<size_t*>(new_next + 1) = blocks_sizes_difference - sizeof(void*) - sizeof(size_t);
-    if (new_next + blocks_sizes_difference != next_target) *new_next = next_target; // если справа занятый
-    else merge_blocks(new_next, 0, next_target); // если справа свободный
-    
-    if (prev_target != nullptr)
+    if (blocks_sizes_difference > 0) // осталось пространство
     {
-        void **next_block_adress = reinterpret_cast<void **>(prev_target);
-        *next_block_adress = next_target;
-    }
-    else set_first_available_block(new_next);
+        void ** new_next = reinterpret_cast<void**>(reinterpret_cast<unsigned char *>(block) + result_size);
+        *reinterpret_cast<size_t*>(new_next + 1) = blocks_sizes_difference - sizeof(void*) - sizeof(size_t);
 
+        if (new_next + blocks_sizes_difference != next_target) *new_next = next_target; // если справа занятый
+        else merge_blocks(new_next, 0, next_target); // если справа свободный
+
+        if (prev_target != nullptr)
+        {
+            void **next_block_adress = reinterpret_cast<void **>(prev_target);
+            *next_block_adress = new_next;
+        }
+        else set_first_available_block(new_next);
+    }
+    else
+    {
+        std::cout << "HERE 1\n";
+        if (prev_target != nullptr)
+        {
+            std::cout << "HERE+\n";
+            void **next_block_adress = reinterpret_cast<void **>(prev_target);
+            *next_block_adress = next_target;
+        }
+        else
+        {
+            std::cout << "HERE++\n";
+            set_first_available_block(next_target);
+        }
+    }
+    std::cout << "HERE 2\n";
     void ** prev_adress = reinterpret_cast<void**>(block);
-    *prev_adress = nullptr;
+    prev_adress = nullptr;
+    size_t * prev_size_ptr = reinterpret_cast<size_t*>(prev_adress + 1);
+    prev_size_ptr = nullptr;
 
     size_t * size = reinterpret_cast<size_t*>(block);
     *size = requested_size;
@@ -207,6 +231,10 @@ allocator_sorted_list::allocator_sorted_list(
     *alc = get_allocator();
 
     void * result_block = reinterpret_cast<unsigned char *>(block) + meta_size;
+
+    std::vector<allocator_test_utils::block_info> blocks_info = get_blocks_info();
+    print_blocks_info(blocks_info);
+
     trace_with_guard("[End] " + type + function);
     return result_block;
 }
@@ -221,41 +249,42 @@ void allocator_sorted_list::deallocate(void *at)
     size_t meta_size = sizeof(allocator*) + sizeof(size_t);
 
     void * block = reinterpret_cast<unsigned char *>(at) - meta_size;
-    size_t size = get_occupied_block_size(block) + sizeof(size_t) + sizeof(allocator*);
+    size_t block_size = get_occupied_block_size(block);
     if (get_occupied_block_allocator(block) != get_allocator())
     {
         std::string error = "Block doesn't belong to this allocator";
         error_with_guard(error);
         throw std::logic_error(error);
     }
+
+    std::vector<allocator_test_utils::block_info> blocks_info = get_blocks_info();
+    print_blocks_info(blocks_info);
+    std::cout << block_size << std::endl;
+
     void * current_available = get_first_available_block();
-    void * previous_available = get_first_block();
+    void * previous_available = nullptr;
     void * next_available = nullptr;
-
+      
     while (current_available != nullptr) // идем по списку свободных
-    {
-        size_t size_difference = sizeof(reinterpret_cast<unsigned char *>(current_available) - (reinterpret_cast<unsigned char *>(previous_available) + get_available_block_size(previous_available) + sizeof(void*) + sizeof(size_t)));
-        if (size_difference > size)
-        {
-            void * current_occupied = previous_available;
-            while (current_occupied != current_available)
-            {
-                if (current_occupied == block) break;
-                current_occupied = *reinterpret_cast<void**>(reinterpret_cast<unsigned char *>(current_occupied) + sizeof(size_t) + sizeof(allocator*) + get_occupied_block_size(current_occupied));
-            }
-            if (current_occupied == block) break; // нашли блок
-        }
-        else if (size_difference == size && previous_available == block) break; // нашли блок
-        else if (size_difference <= 0 && previous_available == block) break; // нашли блок
+    { 
+        void * current_occupied;
+        if ((previous_available == nullptr && current_available != get_first_block()) || current_available == get_first_block()) current_occupied = get_first_block();
+        else current_occupied = reinterpret_cast<unsigned char *>(previous_available) + get_available_block_size(previous_available) + sizeof(void*) + sizeof(size_t);
 
+        while (current_occupied != current_available)
+        {
+            size_t occupied_size = get_occupied_block_size(current_occupied);
+
+            if (current_occupied == block) break;
+            current_occupied = reinterpret_cast<unsigned char *>(current_occupied) + sizeof(size_t) + sizeof(allocator*) + occupied_size;
+        }
+        if (current_occupied == block) break; // нашли блок
         previous_available = current_available;
         current_available = get_available_block_next_block_address(current_available);
     }
-
-    if (previous_available == get_first_block()) // если блок в начале
+    if (block == get_first_block()) // если блок в начале
     {
-        if (reinterpret_cast<unsigned char *>(block) + 
-            sizeof(size_t) + sizeof(allocator*) + size == current_available) // справа свободный
+        if (reinterpret_cast<unsigned char *>(block) + block_size + meta_size == current_available) // справа свободный
         {
             merge_blocks(block, 1, current_available);
         }
@@ -265,44 +294,50 @@ void allocator_sorted_list::deallocate(void *at)
             old_size_ptr = nullptr;
             void ** new_adress_ptr = reinterpret_cast<void**>(block);
             *new_adress_ptr = current_available;
-            *reinterpret_cast<size_t*>(new_adress_ptr + 1) = size;
+            *reinterpret_cast<size_t*>(new_adress_ptr + 1) = block_size;
         }
         set_first_available_block(block);
+
+        std::vector<allocator_test_utils::block_info> blocks_info = get_blocks_info();
+        print_blocks_info(blocks_info);
+
         trace_with_guard("[End] " + type + function);
         return;
     }
-
-    if (current_available == *reinterpret_cast<void**>(reinterpret_cast<unsigned char *>(block) + sizeof(size_t) + 
-    get_occupied_block_size(block)) && current_available != nullptr) // если справа свободный
+    if (current_available == reinterpret_cast<unsigned char *>(block) +
+    sizeof(size_t) + sizeof(allocator*) + block_size && current_available != nullptr) // если справа свободный
     {
         // сначала мерж с правым
         merge_blocks(block, 1, current_available);
 
         //меняем указатель у левого
-        *reinterpret_cast<void**>(previous_available) = block;
-
-        if (*reinterpret_cast<void**>(reinterpret_cast<unsigned char *>(previous_available) + sizeof(size_t) + 
-        sizeof(void*) + get_available_block_size(previous_available)) == block) // если слева свободный
+        if (previous_available != nullptr)
         {
-            // мержим с левым
-            merge_blocks(previous_available, 0, block);
+            *reinterpret_cast<void**>(previous_available) = block;
+
+            if (reinterpret_cast<unsigned char *>(previous_available) + sizeof(size_t) + 
+            sizeof(void*) + get_available_block_size(previous_available) == block) // если слева свободный
+            {
+                // мержим с левым
+                merge_blocks(previous_available, 0, block);
+            }
         }
-        // если слева занятый, то ничего не надо
+        else set_first_available_block(block);
     }
-    else if (current_available == *reinterpret_cast<void**>(reinterpret_cast<unsigned char *>(block) + sizeof(size_t) + 
-    get_occupied_block_size(block)) && current_available == nullptr) // если справа конец
+    else if (current_available == reinterpret_cast<unsigned char *>(block) + sizeof(size_t) + 
+    sizeof(allocator*) + block_size && current_available == nullptr) // если справа конец
     {
         size_t * old_size = reinterpret_cast<size_t*>(block);
         old_size = nullptr;
         void ** new_adress = reinterpret_cast<void**>(block);
         *new_adress = nullptr;
-        *reinterpret_cast<size_t*>(new_adress + 1) = size;
+        *reinterpret_cast<size_t*>(new_adress + 1) = block_size;
 
         //меняем указатель у левого
         *reinterpret_cast<void**>(previous_available) = block;
 
-        if (*reinterpret_cast<void**>(reinterpret_cast<unsigned char *>(previous_available) + sizeof(size_t) + 
-        sizeof(void*) + get_available_block_size(previous_available)) == block) // если слева свободный
+        if (reinterpret_cast<unsigned char *>(previous_available) + sizeof(size_t) + 
+        sizeof(void*) + get_available_block_size(previous_available) == block) // если слева свободный
         {
             merge_blocks(previous_available, 0, block);
         }
@@ -312,30 +347,50 @@ void allocator_sorted_list::deallocate(void *at)
         size_t * old_size = reinterpret_cast<size_t*>(block);
         old_size = nullptr;
         void ** new_adress = reinterpret_cast<void**>(block);
-        *new_adress = get_available_block_next_block_address(current_available);
-        *reinterpret_cast<size_t*>(new_adress + 1) = size;
 
+        *new_adress = current_available;
+        *reinterpret_cast<size_t*>(new_adress + 1) = block_size;
         //меняем указатель у левого
-        *reinterpret_cast<void**>(previous_available) = block;
-
-        if (*reinterpret_cast<void**>(reinterpret_cast<unsigned char *>(previous_available) + sizeof(size_t) + 
-        sizeof(void*) + get_available_block_size(previous_available)) == block) // если слева свободный
+        if (previous_available != nullptr)
         {
-            merge_blocks(previous_available, 0, block);
+            *reinterpret_cast<void**>(previous_available) = reinterpret_cast<void **>(block);
+            if (reinterpret_cast<unsigned char *>(previous_available) + sizeof(size_t) + 
+            sizeof(void*) + get_available_block_size(previous_available) == block) // если слева свободный
+            {
+                merge_blocks(previous_available, 0, block);
+            }
         }
+        else set_first_available_block(block);
     }
+    
+    blocks_info = get_blocks_info();
+    print_blocks_info(blocks_info);
+
     trace_with_guard("[End] " + type + function);
+}
+
+void allocator_sorted_list::print_blocks_info(std::vector<allocator_test_utils::block_info> blocks_info) const noexcept
+{
+    std::string str_block_info = "Blocks information:\n";
+    for (auto block : blocks_info)
+    {
+        str_block_info += "\t<";
+        if (block.is_block_occupied) str_block_info += "occup> ";
+        else str_block_info += "avail> ";
+        str_block_info += "<" + std::to_string(block.block_size) + ">\n";
+    }
+    debug_with_guard(str_block_info);
 }
 
 inline void allocator_sorted_list::set_fit_mode(
     allocator_with_fit_mode::fit_mode mode)
 {
-    *reinterpret_cast<allocator_with_fit_mode::fit_mode*>(reinterpret_cast<logger **>(reinterpret_cast<allocator**>(_trusted_memory) + 1) + 1) = mode;
+    *reinterpret_cast<allocator_with_fit_mode::fit_mode*>(reinterpret_cast<unsigned char *>(_trusted_memory) + sizeof(allocator*) + sizeof(logger*) + sizeof(size_t)) = mode;
 }
 
 inline allocator_with_fit_mode::fit_mode allocator_sorted_list::get_fit_mode()
 {
-    return *reinterpret_cast<allocator_with_fit_mode::fit_mode*>(reinterpret_cast<logger **>(reinterpret_cast<allocator**>(_trusted_memory) + 1) + 1 + sizeof(size_t));
+    return *reinterpret_cast<allocator_with_fit_mode::fit_mode*>(reinterpret_cast<unsigned char *>(_trusted_memory) + sizeof(allocator*) + sizeof(logger*) + sizeof(size_t));
 }
 
 inline allocator *allocator_sorted_list::get_allocator() const
@@ -345,7 +400,46 @@ inline allocator *allocator_sorted_list::get_allocator() const
 
 std::vector<allocator_test_utils::block_info> allocator_sorted_list::get_blocks_info() const noexcept
 {
- // TODO
+    void * current_available = get_first_available_block();
+    void * previous_available = nullptr;
+    void * current_occupied = nullptr;
+    void * previous_occupied = nullptr;
+
+    std::vector<allocator_test_utils::block_info> blocks_info;
+
+    while (current_available != nullptr)
+    {
+        if ((previous_available == nullptr && current_available != get_first_block()) || current_available == get_first_block()) 
+        {
+            current_occupied = get_first_block();
+        }
+        else
+        {
+            current_occupied = reinterpret_cast<unsigned char *>(previous_available) + sizeof(void*) + sizeof(size_t) + get_available_block_size(previous_available);
+        }
+        while (current_occupied != current_available)
+        {
+            size_t size_diff = reinterpret_cast<unsigned char *>(current_available) - reinterpret_cast<unsigned char*>(current_occupied);
+            size_t occupied_size = get_occupied_block_size(current_occupied);
+
+            allocator_test_utils::block_info occupied_block;
+            occupied_block.block_size = occupied_size;
+            occupied_block.is_block_occupied = true;
+            blocks_info.push_back(occupied_block);
+
+            previous_occupied = current_occupied;
+            current_occupied = reinterpret_cast<unsigned char *>(current_occupied) + sizeof(size_t) + sizeof(allocator*) + occupied_size;
+       }
+        allocator_test_utils::block_info available_block;
+        available_block.block_size = get_available_block_size(current_available);
+        available_block.is_block_occupied = false;
+        blocks_info.push_back(available_block);
+
+        previous_available = current_available;
+        current_available = get_available_block_next_block_address(current_available);
+    }
+
+    return blocks_info;
 }
 
 inline logger *allocator_sorted_list::get_logger() const
@@ -363,29 +457,30 @@ void *allocator_sorted_list::get_first_available_block() const noexcept
     return *reinterpret_cast<void **>(reinterpret_cast<unsigned char *>(_trusted_memory) + sizeof(allocator *) + sizeof(logger *) + sizeof(size_t) + sizeof(allocator_with_fit_mode::fit_mode));
 }
 
-allocator::block_size_t allocator_sorted_list::get_available_block_size(void *block_address) noexcept
+allocator::block_size_t allocator_sorted_list::get_available_block_size(void *block_address) const noexcept
 {
     return *reinterpret_cast<allocator::block_size_t *>(reinterpret_cast<void **>(block_address) + 1);
 }
 
-void *allocator_sorted_list::get_available_block_next_block_address(void *block_address) noexcept
+void *allocator_sorted_list::get_available_block_next_block_address(void *block_address) const noexcept
 {
     return *reinterpret_cast<void **>(block_address);
 }
 
-allocator::block_size_t allocator_sorted_list::get_occupied_block_size(void *block_address) noexcept
+allocator::block_size_t allocator_sorted_list::get_occupied_block_size(void *block_address) const noexcept
 {
     return *reinterpret_cast<allocator::block_size_t *>(block_address);
 }
 
 void allocator_sorted_list::set_first_available_block(void * first_available_block) const noexcept
 {
-    *reinterpret_cast<void**>(reinterpret_cast<unsigned char *>(_trusted_memory) + sizeof(allocator*) + sizeof(logger*) + sizeof(allocator_with_fit_mode::fit_mode) + sizeof(size_t)) = first_available_block;
+    void ** first_block = reinterpret_cast<void**>(reinterpret_cast<unsigned char *>(_trusted_memory) + sizeof(allocator*) + sizeof(logger*) + sizeof(allocator_with_fit_mode::fit_mode) + sizeof(size_t));
+    *first_block = first_available_block;
 }
 
 void * allocator_sorted_list::get_first_block() const noexcept
 {
-    return *reinterpret_cast<void **>(reinterpret_cast<unsigned char *>(_trusted_memory) + sizeof(allocator *) + sizeof(logger *) + sizeof(size_t) + sizeof(allocator_with_fit_mode::fit_mode) + sizeof(void*));
+    return reinterpret_cast<unsigned char *>(_trusted_memory) + sizeof(allocator *) + sizeof(logger *) + sizeof(size_t) + sizeof(allocator_with_fit_mode::fit_mode) + sizeof(void*);
 }
 
 void allocator_sorted_list::clear_available_block(void * block) const noexcept
@@ -415,7 +510,7 @@ void allocator_sorted_list::merge_blocks(void * first, int type, void * second) 
     }
     void ** new_adress_ptr = reinterpret_cast<void**>(first);
     *new_adress_ptr = next_adress;
-    *reinterpret_cast<size_t*>(new_adress_ptr + 1) = first_size + second_size;
+    *reinterpret_cast<size_t*>(new_adress_ptr + 1) = first_size + second_size + sizeof(void*) + sizeof(size_t);
     clear_available_block(second);
 }
 
