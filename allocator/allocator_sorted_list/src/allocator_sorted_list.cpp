@@ -1,5 +1,6 @@
 #include <not_implemented.h>
 #include <cstring>
+#include <mutex>
 
 #include "../include/allocator_sorted_list.h"
 
@@ -78,7 +79,7 @@ allocator_sorted_list::allocator_sorted_list(
 
     if (logger != nullptr) logger->trace("[Begin] " + type + function);
 
-    auto meta_size = sizeof(size_t) + sizeof(allocator *) + sizeof(class logger *) + sizeof(allocator_with_fit_mode::fit_mode);
+    auto meta_size = sizeof(size_t) + sizeof(allocator *) + sizeof(class logger *) + sizeof(allocator_with_fit_mode::fit_mode) + sizeof(std::mutex);
     auto block_meta_size = sizeof(size_t) + sizeof(void*);
 
     if (space_size < block_meta_size + sizeof(void*))
@@ -100,31 +101,37 @@ allocator_sorted_list::allocator_sorted_list(
         throw ex;
     }
 
-    allocator **parent_allocator_space_adress = reinterpret_cast<allocator**>(_trusted_memory);
-    *parent_allocator_space_adress = parent_allocator;
+    unsigned char * memory = reinterpret_cast<unsigned char *>(_trusted_memory);
 
-    class logger **logger_space_adress = reinterpret_cast<class logger **>(parent_allocator_space_adress + 1);
-    *logger_space_adress = logger;
-    
-    size_t *size_space_adress = reinterpret_cast<size_t *>(logger_space_adress + 1);
-    *size_space_adress = space_size;
+    *reinterpret_cast<allocator**>(memory) = parent_allocator;
+    memory += sizeof(allocator*);
 
-    allocator_with_fit_mode::fit_mode * fit_mode_space_adress = reinterpret_cast<allocator_with_fit_mode::fit_mode*>(size_space_adress + 1);
-    *fit_mode_space_adress = allocate_fit_mode;
-    allocator_with_fit_mode::fit_mode fit_mode = get_fit_mode();
+    *reinterpret_cast<class logger**>(memory) = logger;
+    memory += sizeof(class logger*);
 
-    void **first_block_space_adress = reinterpret_cast<void **>(fit_mode_space_adress + 1);
-    *first_block_space_adress = reinterpret_cast<void **>(first_block_space_adress + 1); // указатель на первый свободный блок
+    *reinterpret_cast<size_t*>(memory) = space_size;
+    memory += sizeof(size_t);
 
-    *reinterpret_cast<void**>(*first_block_space_adress) = nullptr; // указатель на следующий свободный блок
+    *reinterpret_cast<allocator_with_fit_mode::fit_mode*>(memory) = allocate_fit_mode;
+    memory += sizeof(allocator_with_fit_mode::fit_mode);
 
-    *reinterpret_cast<size_t*>(reinterpret_cast<void**>(*first_block_space_adress) + 1) = space_size;
+    *reinterpret_cast<void**>(memory) = memory + sizeof(void*) + sizeof(std::mutex);
+    memory += sizeof(void*);
+
+    allocator::construct(reinterpret_cast<std::mutex *>(memory));
+    memory += sizeof(std::mutex);
+
+    *reinterpret_cast<void**>(memory) = nullptr;
+    memory += sizeof(void*);
+    *reinterpret_cast<size_t*>(memory) = space_size;
+
     trace_with_guard("[End] " + type + function);
 }
 
 
 [[nodiscard]] void *allocator_sorted_list::allocate(size_t value_size, size_t values_count)
 {
+    std::lock_guard<std::mutex> mutex_guard(get_mutex());
     std::string function = " Allocate\n";
     std::string type = get_typename();
     debug_with_guard("[Begin] " + type + function);
@@ -135,7 +142,6 @@ allocator_sorted_list::allocator_sorted_list(
         requested_size = sizeof(void*);
         warning_with_guard(type + " Requested size has been changed\n");
     }
-
     allocator_with_fit_mode::fit_mode fit_mode = get_fit_mode();
 
     auto meta_size = sizeof(size_t) + sizeof(allocator*);
@@ -256,8 +262,8 @@ std::string allocator_sorted_list::get_block_info(void * block) const noexcept
 {
     // состояние блока
     unsigned char * bytes = reinterpret_cast<unsigned char *>(block);
-    size_t size = get_occupied_block_size(block - sizeof(size_t) - sizeof(allocator*));
-    std::string bytes_array;
+    size_t size = get_occupied_block_size(bytes - sizeof(size_t) - sizeof(allocator*));
+    std::string bytes_array = "";
     for (block_size_t i = 0; i < size; ++i)
     {
         bytes_array += std::to_string(*bytes);
@@ -269,6 +275,7 @@ std::string allocator_sorted_list::get_block_info(void * block) const noexcept
 
 void allocator_sorted_list::deallocate(void *at)
 {
+    std::lock_guard<std::mutex> mutex_guard(get_mutex());
     std::string function = " Deallocate\n";
     std::string type = get_typename();
 
@@ -283,6 +290,7 @@ void allocator_sorted_list::deallocate(void *at)
 
     void * block = reinterpret_cast<unsigned char *>(at) - meta_size;
     size_t block_size = get_occupied_block_size(block);
+    
     if (get_occupied_block_allocator(block) != get_allocator())
     {
         std::string error = "Block doesn't belong to this allocator";
@@ -386,7 +394,7 @@ void allocator_sorted_list::deallocate(void *at)
         //меняем указатель у левого
         if (previous_available != nullptr)
         {
-            *reinterpret_cast<void**>(previous_available) = reinterpret_cast<void **>(block);
+            *reinterpret_cast<void**>(previous_available) = block;
             if (reinterpret_cast<unsigned char *>(previous_available) + sizeof(size_t) + 
             sizeof(void*) + get_available_block_size(previous_available) == block) // если слева свободный
             {
@@ -436,7 +444,7 @@ inline allocator *allocator_sorted_list::get_allocator() const
 std::vector<allocator_test_utils::block_info> allocator_sorted_list::get_blocks_info() const noexcept
 {
     std::string type = "[" + get_typename() + "] ";
-    std::string function = "Get block info\n";
+    std::string function = "Get blocks info\n";
     trace_with_guard("[Begin] " + type + function);
     void * current_available = get_first_available_block();
     void * previous_available = nullptr;
@@ -457,7 +465,6 @@ std::vector<allocator_test_utils::block_info> allocator_sorted_list::get_blocks_
         }
         while (current_occupied != current_available)
         {
-            size_t size_diff = reinterpret_cast<unsigned char *>(current_available) - reinterpret_cast<unsigned char*>(current_occupied);
             size_t occupied_size = get_occupied_block_size(current_occupied);
 
             allocator_test_utils::block_info occupied_block;
@@ -518,7 +525,7 @@ void allocator_sorted_list::set_first_available_block(void * first_available_blo
 
 void * allocator_sorted_list::get_first_block() const noexcept
 {
-    return reinterpret_cast<unsigned char *>(_trusted_memory) + sizeof(allocator *) + sizeof(logger *) + sizeof(size_t) + sizeof(allocator_with_fit_mode::fit_mode) + sizeof(void*);
+    return reinterpret_cast<unsigned char *>(_trusted_memory) + sizeof(allocator *) + sizeof(logger *) + sizeof(size_t) + sizeof(allocator_with_fit_mode::fit_mode) + sizeof(void*) + sizeof(std::mutex);
 }
 
 void allocator_sorted_list::clear_available_block(void * block) const noexcept
@@ -555,4 +562,9 @@ void allocator_sorted_list::merge_blocks(void * first, int type, void * second) 
 allocator * allocator_sorted_list::get_occupied_block_allocator(void * block) const noexcept
 {
     return *reinterpret_cast<allocator**>(reinterpret_cast<unsigned char *>(block) + sizeof(size_t));
+}
+
+std::mutex &allocator_sorted_list::get_mutex() const noexcept
+{
+    return *reinterpret_cast<std::mutex *>(reinterpret_cast<unsigned char*>(_trusted_memory) + sizeof(allocator*) + sizeof(logger*) + sizeof(size_t) + sizeof(void*) + sizeof(allocator_with_fit_mode::fit_mode));
 }
