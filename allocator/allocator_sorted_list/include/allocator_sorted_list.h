@@ -86,6 +86,7 @@ private:
     void merge_blocks(void * first, int type, void * second) noexcept;
     allocator * get_occupied_block_allocator(void * block) const noexcept;
     void print_blocks_info(std::vector<allocator_test_utils::block_info> blocks_info) const noexcept;
+    std::string get_block_info(void * block) const noexcept;
 };
 
 #endif //MATH_PRACTICE_AND_OPERATING_SYSTEMS_ALLOCATOR_ALLOCATOR_SORTED_LIST_H

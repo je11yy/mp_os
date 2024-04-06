@@ -54,7 +54,7 @@ TEST(allocatorSortedListPositiveTests, test1)
     //TODO: Проверка
     
     delete alloc;
-    delete lgr;
+    // delete lgr;
 }
 
 TEST(allocatorSortedListPositiveTests, test2)
@@ -145,7 +145,7 @@ TEST(allocatorSortedListPositiveTests, test3)
     //TODO: проверка
 
     delete allocator;
-    delete lgr;
+    // delete lgr;
     // delete logger;
     
     

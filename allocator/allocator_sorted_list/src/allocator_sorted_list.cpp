@@ -7,7 +7,7 @@ allocator_sorted_list::~allocator_sorted_list()
 {
     std::string type = get_typename();
     std::string function = " Destructor\n";
-    trace_with_guard(type + function);
+    debug_with_guard(type + function);
     deallocate_with_guard(_trusted_memory);
 }
 
@@ -127,7 +127,7 @@ allocator_sorted_list::allocator_sorted_list(
 {
     std::string function = " Allocate\n";
     std::string type = get_typename();
-    trace_with_guard("[Begin] " + type + function);
+    debug_with_guard("[Begin] " + type + function);
 
     auto requested_size = value_size * values_count;
     if (requested_size < sizeof(void*))
@@ -141,6 +141,8 @@ allocator_sorted_list::allocator_sorted_list(
     auto meta_size = sizeof(size_t) + sizeof(allocator*);
     auto result_size = meta_size + requested_size;
 
+    size_t available_memory = 0;
+
     void * block = nullptr;
     void * prev_target = nullptr;
     void * next_target = nullptr;
@@ -152,6 +154,7 @@ allocator_sorted_list::allocator_sorted_list(
     while (current != nullptr)
     {
         size_t current_block_size = get_available_block_size(current);
+        available_memory += current_block_size;
         if (current_block_size == 0) break;
         if (current_block_size >= requested_size)
         {
@@ -243,8 +246,25 @@ allocator_sorted_list::allocator_sorted_list(
     std::vector<allocator_test_utils::block_info> blocks_info = get_blocks_info();
     print_blocks_info(blocks_info);
 
-    trace_with_guard("[End] " + type + function);
+    information_with_guard(type + function + " available memory: " + std::to_string(available_memory));
+
+    debug_with_guard("[End] " + type + function);
     return result_block;
+}
+
+std::string allocator_sorted_list::get_block_info(void * block) const noexcept
+{
+    // состояние блока
+    unsigned char * bytes = reinterpret_cast<unsigned char *>(block);
+    size_t size = get_occupied_block_size(block);
+    std::string bytes_array;
+    for (block_size_t i = 0; i < size; ++i)
+    {
+        bytes_array += std::to_string(*bytes);
+        bytes += sizeof(unsigned char);
+        bytes_array += ' ';
+    }
+    return bytes_array;
 }
 
 void allocator_sorted_list::deallocate(void *at)
@@ -252,9 +272,14 @@ void allocator_sorted_list::deallocate(void *at)
     std::string function = " Deallocate\n";
     std::string type = get_typename();
 
-    trace_with_guard("[Begin] " + type + function);
+    debug_with_guard("[Begin] " + type + function);
+
+    std::string block_info_array = get_block_info(at);
+    debug_with_guard(type + function + " " + block_info_array);
 
     size_t meta_size = sizeof(allocator*) + sizeof(size_t);
+
+    size_t available_memory = 0;
 
     void * block = reinterpret_cast<unsigned char *>(at) - meta_size;
     size_t block_size = get_occupied_block_size(block);
@@ -274,6 +299,7 @@ void allocator_sorted_list::deallocate(void *at)
       
     while (current_available != nullptr) // идем по списку свободных
     { 
+        available_memory += get_available_block_size(current_available);
         void * current_occupied;
         if ((previous_available == nullptr && current_available != get_first_block()) || current_available == get_first_block()) current_occupied = get_first_block();
         else current_occupied = reinterpret_cast<unsigned char *>(previous_available) + get_available_block_size(previous_available) + sizeof(void*) + sizeof(size_t);
@@ -308,7 +334,7 @@ void allocator_sorted_list::deallocate(void *at)
         std::vector<allocator_test_utils::block_info> blocks_info = get_blocks_info();
         print_blocks_info(blocks_info);
 
-        trace_with_guard("[End] " + type + function);
+        debug_with_guard("[End] " + type + function);
         return;
     }
     if (current_available == reinterpret_cast<unsigned char *>(block) +
@@ -373,7 +399,9 @@ void allocator_sorted_list::deallocate(void *at)
     blocks_info = get_blocks_info();
     print_blocks_info(blocks_info);
 
-    trace_with_guard("[End] " + type + function);
+    information_with_guard(type + function + " available memory: " + std::to_string(available_memory));
+
+    debug_with_guard("[End] " + type + function);
 }
 
 void allocator_sorted_list::print_blocks_info(std::vector<allocator_test_utils::block_info> blocks_info) const noexcept
@@ -407,6 +435,9 @@ inline allocator *allocator_sorted_list::get_allocator() const
 
 std::vector<allocator_test_utils::block_info> allocator_sorted_list::get_blocks_info() const noexcept
 {
+    std::string type = "[" + get_typename() + "] ";
+    std::string function = "Get block info\n";
+    trace_with_guard("[Begin] " + type + function);
     void * current_available = get_first_available_block();
     void * previous_available = nullptr;
     void * current_occupied = nullptr;
@@ -445,7 +476,7 @@ std::vector<allocator_test_utils::block_info> allocator_sorted_list::get_blocks_
         previous_available = current_available;
         current_available = get_available_block_next_block_address(current_available);
     }
-
+    trace_with_guard("[End] " + type + function);
     return blocks_info;
 }
 
