@@ -93,9 +93,10 @@ bool infix_iterator_test(
 {
     auto end_infix = tree.cend_infix();
     auto it = tree.cbegin_infix();
-    
+
     for (auto const &item: expected_result)
     {
+        auto data = *it;
         if ((*it)->depth != item.depth || (*it)->key != item.key || (*it)->value != item.value)
         {
             return false;
@@ -166,7 +167,6 @@ TEST(binarySearchTreePositiveTests, test1)
     logger->trace("binarySearchTreePositiveTests.test1 started");
     
     search_tree<int, std::string> *bst = new binary_search_tree<int, std::string>(key_comparer(), nullptr, logger);
-    
     bst->insert(5, "a");
     bst->insert(2, "b");
     bst->insert(15, "c");
@@ -202,7 +202,6 @@ TEST(binarySearchTreePositiveTests, test2)
             }
         });
     logger->trace("binarySearchTreePositiveTests.test2 started");
-    
     search_tree<int, int> *bst = new binary_search_tree<int, int>(key_comparer(), nullptr, logger);
     
     bst->insert(1, 5);
@@ -237,6 +236,7 @@ TEST(binarySearchTreePositiveTests, test3)
                 logger::severity::trace
             }
         });
+        
     logger->trace("binarySearchTreePositiveTests.test3 started");
     
     search_tree<std::string, int> *bst = new binary_search_tree<std::string, int>(key_comparer(), nullptr, logger);

@@ -1,0 +1,124 @@
+[TRACE] binarySearchTreePositiveTests.test11 started
+
+[TRACE] [BST] Trying to insert new node...
+
+
+[TRACE] [BST] Node was inserted
+
+
+[TRACE] [BST] Trying to insert new node...
+
+
+[TRACE] [BST] Node was inserted
+
+
+[TRACE] [BST] Trying to insert new node...
+
+
+[TRACE] [BST] Node was inserted
+
+
+[TRACE] [BST] Trying to insert new node...
+
+
+[TRACE] [BST] Node was inserted
+
+
+[TRACE] [BST] Trying to insert new node...
+
+
+[TRACE] [BST] Node was inserted
+
+
+[TRACE] [BST] Trying to insert new node...
+
+
+[TRACE] [BST] Node was inserted
+
+
+[TRACE] [BST] Trying to insert new node...
+
+
+[TRACE] [BST] Node was inserted
+
+
+[TRACE] [BST] Trying to insert new node...
+
+
+[TRACE] [BST] Node was inserted
+
+
+[TRACE] [BST] Creating iterator data...
+
+
+[TRACE] [BST] Iterator data was successfully created
+
+
+[TRACE] [BST] Creating iterator data...
+
+
+[TRACE] [BST] Iterator data was successfully created
+
+
+[TRACE] [BST] Creating iterator data...
+
+
+[TRACE] [BST] Iterator data was successfully created
+
+
+[TRACE] [BST] Creating iterator data...
+
+
+[TRACE] [BST] Iterator data was successfully created
+
+
+[TRACE] [BST] Creating iterator data...
+
+
+[TRACE] [BST] Iterator data was successfully created
+
+
+[TRACE] [BST] Creating iterator data...
+
+
+[TRACE] [BST] Iterator data was successfully created
+
+
+[TRACE] [BST] Creating iterator data...
+
+
+[TRACE] [BST] Iterator data was successfully created
+
+
+[TRACE] [BST] Creating iterator data...
+
+
+[TRACE] [BST] Iterator data was successfully created
+
+
+[TRACE] binarySearchTreePositiveTests.test11 finished
+
+[TRACE] [BST] Node was deleted
+
+
+[TRACE] [BST] Node was deleted
+
+
+[TRACE] [BST] Node was deleted
+
+
+[TRACE] [BST] Node was deleted
+
+
+[TRACE] [BST] Node was deleted
+
+
+[TRACE] [BST] Node was deleted
+
+
+[TRACE] [BST] Node was deleted
+
+
+[TRACE] [BST] Node was deleted
+
+
