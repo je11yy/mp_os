@@ -32,12 +32,12 @@ logger *create_logger(
 
 TEST(allocatorSortedListPositiveTests, test1)
 {
-    //TODO: logger
-    // logger_builder * builder = new client_logger_builder;
-    // logger * lgr = builder -> add_console_stream(logger::severity::debug) ->
-    // add_console_stream(logger::severity::error) -> add_console_stream(logger::severity::trace) ->
-    // add_console_stream(logger::severity::warning) -> build();
-    logger * lgr = nullptr;
+    // TODO: logger
+    logger_builder * builder = new client_logger_builder;
+    logger * lgr = builder -> add_console_stream(logger::severity::debug) ->
+    add_console_stream(logger::severity::error) -> add_console_stream(logger::severity::trace) ->
+    add_console_stream(logger::severity::warning) -> build();
+    // logger * lgr = nullptr;
     
     allocator *alloc = new allocator_sorted_list(3000, nullptr, lgr, allocator_with_fit_mode::fit_mode::first_fit);
     
