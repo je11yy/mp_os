@@ -7,6 +7,9 @@
 #include <logger_guardant.h>
 #include <typename_holder.h>
 
+#include <mutex>
+#include <cstring>
+
 class allocator_boundary_tags final:
     private allocator_guardant,
     public allocator_test_utils,
@@ -17,7 +20,7 @@ class allocator_boundary_tags final:
 
 private:
     
-    void *_trusted_memory;
+    void *_trusted_memory = nullptr;
 
 public:
     
@@ -40,7 +43,7 @@ public:
     explicit allocator_boundary_tags(
         size_t space_size,
         allocator *parent_allocator = nullptr,
-        logger *logger = nullptr,
+        logger *_logger = nullptr,
         allocator_with_fit_mode::fit_mode allocate_fit_mode = allocator_with_fit_mode::fit_mode::first_fit);
 
 public:
@@ -72,6 +75,44 @@ private:
 private:
     
     inline std::string get_typename() const noexcept override;
+
+private:
+
+    inline allocator_with_fit_mode::fit_mode get_fit_mode() override;
+
+private: 
+
+    void * get_first_occupied_block() const noexcept;
+
+    void * get_first_block() const noexcept;
+
+    size_t get_block_size(void * block) const noexcept;
+
+    allocator * get_block_allocator(void * block) const noexcept;
+
+    void * get_prev_block(void * block) const noexcept;
+
+    void * get_next_block(void * block) const noexcept;
+
+    void connect_blocks(void * prev, void * next) noexcept;
+
+    std::mutex & get_mutex() const noexcept;
+
+    size_t get_memory_size() const noexcept;
+
+    void set_first_occupied_block(void * block) const noexcept;
+
+    void clear_block(void * block) const noexcept;
+
+    void * get_end() const noexcept;
+
+    size_t get_available_memory() const noexcept;
+
+    std::string make_blocks_info_string(std::vector<allocator_test_utils::block_info> info) const noexcept;
+
+    std::string block_status(bool state) const noexcept;
+
+    std::string get_block_info(void * block) const noexcept;
     
 };
 

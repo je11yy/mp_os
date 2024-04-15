@@ -1,0 +1,20 @@
+[INFORMATION] [Allocator Boundary Tags] Available memory: 208
+
+[INFORMATION] [Allocator Boundary Tags] Available memory: 136
+
+[INFORMATION] [Allocator Boundary Tags] Available memory: 64
+
+[INFORMATION] [Allocator Boundary Tags] Available memory: 136
+
+[INFORMATION] [Allocator Boundary Tags] Available memory: 96
+
+[INFORMATION] [Allocator Boundary Tags] Available memory: 32
+
+[INFORMATION] [Allocator Boundary Tags] Available memory: 104
+
+[INFORMATION] [Allocator Boundary Tags] Available memory: 176
+
+[INFORMATION] [Allocator Boundary Tags] Available memory: 216
+
+[INFORMATION] [Allocator Boundary Tags] Available memory: 280
+
