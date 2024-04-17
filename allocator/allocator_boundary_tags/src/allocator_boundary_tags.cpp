@@ -4,87 +4,40 @@
 
 std::string start = " [START] ";
 std::string end = " [END] ";
+std::string type = "[Allocator Boundary Tags]";
+std::string occupied = "occup";
+std::string available = "avail";
 
 allocator_boundary_tags::~allocator_boundary_tags()
 {
     std::string function = "Destructor\n";
     debug_with_guard(get_typename() + start + function);
     logger * _logger = get_logger();
+    allocator::destruct(&get_mutex());
     deallocate_with_guard(_trusted_memory);
     if (_logger != nullptr) _logger->debug(get_typename() + end + function);
-}
-
-allocator_boundary_tags::allocator_boundary_tags(
-    allocator_boundary_tags const &other)
-{
-    std::string function = "Copy constructor\n";
-    debug_with_guard(get_typename() + start + function);
-
-    if (_trusted_memory != nullptr) deallocate_with_guard(_trusted_memory);
-    try
-    {
-        auto meta_size = sizeof(allocator*) + sizeof(logger*) + sizeof(size_t) + sizeof(allocator_with_fit_mode::fit_mode) + sizeof(std::mutex) + sizeof(void*);
-        _trusted_memory = other.allocate_with_guard(other.get_memory_size() + meta_size, 1);
-    }
-    catch(const std::exception& e)
-    {
-        std::string error = "BadAlloc corrupted while allocating memory\n";
-        other.error_with_guard(get_typename() + error);
-        throw std::bad_alloc();
-    }
-    std::memcpy(_trusted_memory, other._trusted_memory, other.get_memory_size());
-
-    debug_with_guard(get_typename() + end + function);
-}
-
-allocator_boundary_tags &allocator_boundary_tags::operator=(
-    allocator_boundary_tags const &other)
-{
-    std::string function = "Copy operator\n";
-    debug_with_guard(get_typename() + start + function);
-
-    if (this == &other)
-    {
-        debug_with_guard(get_typename() + end + function);
-        return *this;
-    }
-
-    if (_trusted_memory != nullptr) deallocate_with_guard(_trusted_memory);
-    try
-    {
-        auto meta_size = sizeof(allocator*) + sizeof(logger*) + sizeof(size_t) + sizeof(allocator_with_fit_mode::fit_mode) + sizeof(std::mutex) + sizeof(void*);
-        _trusted_memory = other.allocate_with_guard(other.get_memory_size() + meta_size, 1);
-    }
-    catch(const std::exception& e)
-    {
-        std::string error = "BadAlloc corrupted while allocating memory\n";
-        other.error_with_guard(get_typename() + error);
-        throw std::bad_alloc();
-    }
-    std::memcpy(_trusted_memory, other._trusted_memory, other.get_memory_size());
-
-
-    debug_with_guard(get_typename() + end + function);
-    return *this;
 }
 
 allocator_boundary_tags::allocator_boundary_tags(
     allocator_boundary_tags &&other) noexcept
 {
     std::string function = "Move constructor\n";
-    debug_with_guard(get_typename() + start + function);
+    logger * log = other.get_logger();
+    if (log != nullptr) log->debug(get_typename() + start + function);
 
     if (_trusted_memory != nullptr) deallocate_with_guard(_trusted_memory);
-    _trusted_memory = std::move(other._trusted_memory);
+    _trusted_memory = other._trusted_memory;
+    other._trusted_memory = nullptr;
 
-    debug_with_guard(get_typename() + end + function);
+    if (log != nullptr) log->debug(get_typename() + end + function);
 }
 
 allocator_boundary_tags &allocator_boundary_tags::operator=(
     allocator_boundary_tags &&other) noexcept
 {
     std::string function = "Move operator\n";
-    debug_with_guard(get_typename() + start + function);
+    logger * log = other.get_logger();
+    if (log != nullptr) log->debug(get_typename() + start + function);
 
     if (this == &other)
     {
@@ -93,9 +46,10 @@ allocator_boundary_tags &allocator_boundary_tags::operator=(
     }
 
     if (_trusted_memory != nullptr) deallocate_with_guard(_trusted_memory);
-    _trusted_memory = std::move(other._trusted_memory);
+    _trusted_memory = other._trusted_memory;
+    other._trusted_memory = nullptr;
 
-    debug_with_guard(get_typename() + end + function);
+    if (log != nullptr) log->debug(get_typename() + end + function);
     return *this;
 }
 
@@ -458,8 +412,8 @@ std::string allocator_boundary_tags::make_blocks_info_string(std::vector<allocat
 
 std::string allocator_boundary_tags::block_status(bool state) const noexcept
 {
-    if (state) return "occup";
-    return "avail";
+    if (state) return occupied;
+    return available;
 }
 
 inline logger *allocator_boundary_tags::get_logger() const
@@ -469,7 +423,7 @@ inline logger *allocator_boundary_tags::get_logger() const
 
 inline std::string allocator_boundary_tags::get_typename() const noexcept
 {
-    return "[Allocator Boundary Tags]";
+    return type;
 }
 
 inline allocator_with_fit_mode::fit_mode allocator_boundary_tags::get_fit_mode()
