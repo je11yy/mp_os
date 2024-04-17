@@ -33,11 +33,11 @@ logger *create_logger(
 TEST(allocatorSortedListPositiveTests, test1)
 {
     // TODO: logger
-    logger_builder * builder = new client_logger_builder;
-    logger * lgr = builder -> add_console_stream(logger::severity::debug) ->
-    add_console_stream(logger::severity::error) -> add_console_stream(logger::severity::trace) ->
-    add_console_stream(logger::severity::warning) -> build();
-    // logger * lgr = nullptr;
+    // logger_builder * builder = new client_logger_builder;
+    // logger * lgr = builder -> add_console_stream(logger::severity::debug) ->
+    // add_console_stream(logger::severity::error) -> add_console_stream(logger::severity::trace) ->
+    // add_console_stream(logger::severity::warning) -> build();
+    logger * lgr = nullptr;
     
     allocator *alloc = new allocator_sorted_list(3000, nullptr, lgr, allocator_with_fit_mode::fit_mode::first_fit);
     
@@ -88,12 +88,12 @@ TEST(allocatorSortedListPositiveTests, test2)
 
 TEST(allocatorSortedListPositiveTests, test3)
 {
-    //TODO: logger
-    // logger_builder * builder = new client_logger_builder;
-    // logger * lgr = builder -> add_console_stream(logger::severity::debug) ->
-    // add_console_stream(logger::severity::error) -> add_console_stream(logger::severity::trace) ->
-    // add_console_stream(logger::severity::warning) -> build();
-    logger * lgr = nullptr;
+    // TODO: logger
+    logger_builder * builder = new client_logger_builder;
+    logger * lgr = builder -> add_console_stream(logger::severity::debug) ->
+    add_console_stream(logger::severity::error) -> add_console_stream(logger::severity::trace) ->
+    add_console_stream(logger::severity::warning) -> build();
+    // logger * lgr = nullptr;
 
     allocator *allocator = new allocator_sorted_list(5000, nullptr, lgr, allocator_with_fit_mode::fit_mode::first_fit);
     
@@ -156,22 +156,20 @@ TEST(allocatorSortedListPositiveTests, test4)
     //TODO: logger
     // logger_builder * builder = new client_logger_builder;
     // logger * lgr = builder -> add_console_stream(logger::severity::debug) ->
-    // add_console_stream(logger::severity::error) -> add_console_stream(logger::severity::trace) ->
     // add_console_stream(logger::severity::warning) -> build();
     logger * lgr = nullptr;
     
-    allocator *alloc = new allocator_sorted_list(1000, nullptr, lgr, allocator_with_fit_mode::fit_mode::first_fit);
-    
+    allocator *alloc = new allocator_sorted_list(3000, nullptr, lgr, allocator_with_fit_mode::fit_mode::first_fit);
     auto first_block = reinterpret_cast<unsigned char *>(alloc->allocate(sizeof(unsigned char), 250));
     auto second_block = reinterpret_cast<unsigned char *>(alloc->allocate(sizeof(char), 150));
-    auto third_block = reinterpret_cast<unsigned char *>(alloc->allocate(sizeof(unsigned char *), 300));
+    auto third_block = reinterpret_cast<unsigned char *>(alloc->allocate(sizeof(unsigned char), 300));
     
     auto *the_same_subject = dynamic_cast<allocator_with_fit_mode *>(alloc);
     the_same_subject->set_fit_mode(allocator_with_fit_mode::fit_mode::the_worst_fit);
-    auto four_block = reinterpret_cast<unsigned char *>(alloc->allocate(sizeof(unsigned char *), 50));
+    auto four_block = reinterpret_cast<unsigned char *>(alloc->allocate(sizeof(unsigned char), 50));
     
     the_same_subject->set_fit_mode(allocator_with_fit_mode::fit_mode::the_best_fit);
-    auto five_block = reinterpret_cast<unsigned char *>(alloc->allocate(sizeof(unsigned char *), 50));
+    auto five_block = reinterpret_cast<unsigned char *>(alloc->allocate(sizeof(unsigned char), 50));
     
     alloc->deallocate(first_block);
     alloc->deallocate(second_block);
@@ -186,22 +184,22 @@ TEST(allocatorSortedListPositiveTests, test4)
 
 TEST(allocatorSortedListPositiveTests, test5)
 {
-    // logger_builder * builder = new client_logger_builder;
-    // logger * lgr = builder -> add_console_stream(logger::severity::debug) ->
-    // add_console_stream(logger::severity::error) -> add_console_stream(logger::severity::trace) ->
-    // add_console_stream(logger::severity::warning) -> build();
-    logger * lgr = nullptr;
+    logger_builder * builder = new client_logger_builder;
+    logger * lgr = builder -> add_console_stream(logger::severity::debug) ->
+    add_console_stream(logger::severity::error) -> add_console_stream(logger::severity::trace) ->
+    add_console_stream(logger::severity::warning) -> build();
+    // logger * lgr = nullptr;
 
-    allocator *alloc = new allocator_sorted_list(3000, nullptr, lgr, allocator_with_fit_mode::fit_mode::first_fit);
+    allocator *alloc = new allocator_sorted_list(5000, nullptr, lgr, allocator_with_fit_mode::fit_mode::first_fit);
     
     auto first_block = reinterpret_cast<int *>(alloc->allocate(sizeof(int), 250));
     auto second_block = reinterpret_cast<char *>(alloc->allocate(sizeof(char), 500));
-    auto third_block = reinterpret_cast<double *>(alloc->allocate(sizeof(double *), 250));
+    auto third_block = reinterpret_cast<double *>(alloc->allocate(sizeof(double), 250));
     alloc->deallocate(first_block);
     first_block = reinterpret_cast<int *>(alloc->allocate(sizeof(int), 245));
     
     //TODO: logger
-    allocator *allocator = new allocator_sorted_list(5000, nullptr, nullptr, allocator_with_fit_mode::fit_mode::first_fit);
+    allocator *allocator = new allocator_sorted_list(5000, nullptr, lgr, allocator_with_fit_mode::fit_mode::first_fit);
     auto *the_same_subject = dynamic_cast<allocator_with_fit_mode *>(alloc);
     int iterations_count = 100;
     
@@ -243,7 +241,7 @@ TEST(allocatorSortedListPositiveTests, test5)
                 }
                 
                 auto it = allocated_blocks.begin();
-                std::advance(it, rand() % allocated_blocks.size());
+                if (allocated_blocks.size() > 1) std::advance(it, rand() % allocated_blocks.size());
                 allocator->deallocate(*it);
                 allocated_blocks.erase(it);
                 std::cout << "deallocation succeeded" << std::endl;
@@ -254,7 +252,7 @@ TEST(allocatorSortedListPositiveTests, test5)
     while (!allocated_blocks.empty())
     {
         auto it = allocated_blocks.begin();
-        std::advance(it, rand() % allocated_blocks.size());
+        if (allocated_blocks.size() > 1) std::advance(it, rand() % allocated_blocks.size());
         allocator->deallocate(*it);
         allocated_blocks.erase(it);
         std::cout << "deallocation succeeded" << std::endl;

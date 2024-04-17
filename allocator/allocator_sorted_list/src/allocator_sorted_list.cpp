@@ -4,66 +4,50 @@
 
 #include "../include/allocator_sorted_list.h"
 
+std::string start = " [START] ";
+std::string end = " [END] ";
+
 allocator_sorted_list::~allocator_sorted_list()
 {
-    std::string type = get_typename();
-    std::string function = " Destructor\n";
-    debug_with_guard(type + function);
+    std::string function = "Destructor\n";
+    debug_with_guard(get_typename() + start + function);
+    logger * _logger = get_logger();
     deallocate_with_guard(_trusted_memory);
+    if (_logger != nullptr) _logger->debug(get_typename() + end + function);
 }
 
 allocator_sorted_list::allocator_sorted_list(
-    allocator_sorted_list const &other)
+    allocator_sorted_list &&other) noexcept
 {
-    std::string type = get_typename();
-    std::string function = " Copy constructor\n";
-    trace_with_guard("[Begin] " + type + function);
+    std::string function = "Move constructor\n";
+    logger * log = other.get_logger();
+    if (log != nullptr) log->debug(get_typename() + start + function);
 
-    deallocate_with_guard(_trusted_memory);
-    auto meta_size = sizeof(size_t) + sizeof(allocator *) + sizeof(class logger *) + sizeof(allocator_with_fit_mode::fit_mode);
-    auto size = *(reinterpret_cast<unsigned char *>(_trusted_memory) + meta_size - sizeof(size_t)) + meta_size;
-    _trusted_memory = other.allocate_with_guard(size, 1);
-    std::memcpy(_trusted_memory, other._trusted_memory, size);
-    
-    trace_with_guard("[End] " + type + function);
-}
+    if (_trusted_memory != nullptr) deallocate_with_guard(_trusted_memory);
+    _trusted_memory = other._trusted_memory;
+    other._trusted_memory = nullptr;
 
-allocator_sorted_list &allocator_sorted_list::operator=(
-    allocator_sorted_list const &other)
-{
-    std::string type = get_typename();
-    std::string function = " Copy operator\n";
-    trace_with_guard("[Begin] " + type + function);
-    if (this == &other) return *this;
-
-    deallocate_with_guard(_trusted_memory);
-    auto meta_size = sizeof(size_t) + sizeof(allocator *) + sizeof(class logger *) + sizeof(allocator_with_fit_mode::fit_mode);
-    auto size = *(reinterpret_cast<unsigned char *>(_trusted_memory) + meta_size - sizeof(size_t)) + meta_size;
-    _trusted_memory = other.allocate_with_guard(size, 1);
-    std::memcpy(_trusted_memory, other._trusted_memory, size);
-
-    trace_with_guard("[End] " + type + function);
-    return *this;
-}
-
-allocator_sorted_list::allocator_sorted_list(
-    allocator_sorted_list &&other) noexcept : _trusted_memory(std::move(other._trusted_memory))
-{
-    std::string type = get_typename();
-    std::string function = " Move constructor\n";
-    trace_with_guard("[Begin] " + type + function);
-    trace_with_guard("[End] " + type + function);
+    if (log != nullptr) log->debug(get_typename() + end + function);
 }
 
 allocator_sorted_list &allocator_sorted_list::operator=(
     allocator_sorted_list &&other) noexcept
 {
-    std::string type = get_typename();
-    std::string function = " Move operator\n";
-    trace_with_guard("[Begin] " + type + function);
-    if (this == &other) return *this;
-    _trusted_memory = std::move(other._trusted_memory);
-    trace_with_guard("[End] " + type + function);
+    std::string function = "Move operator\n";
+    logger * log = other.get_logger();
+    if (log != nullptr) log->debug(get_typename() + start + function);
+
+    if (this == &other)
+    {
+        debug_with_guard(get_typename() + end + function);
+        return *this;
+    }
+
+    if (_trusted_memory != nullptr) deallocate_with_guard(_trusted_memory);
+    _trusted_memory = other._trusted_memory;
+    other._trusted_memory = nullptr;
+
+    if (log != nullptr) log->debug(get_typename() + end + function);
     return *this;
 }
 
@@ -73,18 +57,17 @@ allocator_sorted_list::allocator_sorted_list(
     logger *logger,
     allocator_with_fit_mode::fit_mode allocate_fit_mode)
 {
-    std::string function = " Constructor\n";
-    std::string space_error = "Not enough space for allocator\n";
-    std::string type = get_typename();
+    std::string function = "Constructor\n";
 
-    if (logger != nullptr) logger->trace("[Begin] " + type + function);
+    if (logger != nullptr) logger->debug(get_typename() + start + function);
 
     auto meta_size = sizeof(size_t) + sizeof(allocator *) + sizeof(class logger *) + sizeof(allocator_with_fit_mode::fit_mode) + sizeof(std::mutex);
     auto block_meta_size = sizeof(size_t) + sizeof(void*);
 
     if (space_size < block_meta_size + sizeof(void*))
     {
-        if (logger != nullptr) logger->error(type + " " + space_error);
+        std::string space_error = " Not enough space for allocator\n";
+        if (logger != nullptr) logger->error(get_typename() + space_error);
         throw std::logic_error(space_error);
     }
     auto result_size = space_size + meta_size;
@@ -96,8 +79,8 @@ allocator_sorted_list::allocator_sorted_list(
     }
     catch(std::bad_alloc const &ex)
     {
-        std::string error = "Bad alloc while allocating trusted memory\n";
-        if (logger != nullptr) logger->error(type + " " + error);
+        std::string error = " Bad alloc while allocating trusted memory\n";
+        if (logger != nullptr) logger->error(get_typename() + error);
         throw ex;
     }
 
@@ -125,22 +108,21 @@ allocator_sorted_list::allocator_sorted_list(
     memory += sizeof(void*);
     *reinterpret_cast<size_t*>(memory) = space_size;
 
-    trace_with_guard("[End] " + type + function);
+    debug_with_guard(get_typename() + end + function);
 }
 
 
 [[nodiscard]] void *allocator_sorted_list::allocate(size_t value_size, size_t values_count)
 {
     std::lock_guard<std::mutex> mutex_guard(get_mutex());
-    std::string function = " Allocate\n";
-    std::string type = get_typename();
-    debug_with_guard("[Begin] " + type + function);
+    std::string function = "Allocate\n";
+    debug_with_guard(get_typename() + start + function);
 
     auto requested_size = value_size * values_count;
     if (requested_size < sizeof(void*))
     {
         requested_size = sizeof(void*);
-        warning_with_guard(type + " Requested size has been changed\n");
+        warning_with_guard(get_typename() + " Requested size has been changed\n");
     }
     allocator_with_fit_mode::fit_mode fit_mode = get_fit_mode();
 
@@ -162,7 +144,7 @@ allocator_sorted_list::allocator_sorted_list(
         size_t current_block_size = get_available_block_size(current);
         available_memory += current_block_size;
         if (current_block_size == 0) break;
-        if (current_block_size >= requested_size)
+        if (current_block_size >= result_size)
         {
             if (fit_mode == allocator_with_fit_mode::fit_mode::first_fit && block == nullptr)
             {
@@ -197,13 +179,14 @@ allocator_sorted_list::allocator_sorted_list(
     }
     if (block == nullptr)
     {
-        error_with_guard(type + " Cannot allocate block\n");
+        error_with_guard(get_typename() + " Cannot allocate block\n");
         throw std::bad_alloc();
     }
+
     auto blocks_sizes_difference = get_available_block_size(block) - requested_size;
     if (blocks_sizes_difference > 0 && blocks_sizes_difference < meta_size)
     {
-        warning_with_guard(" Requested space size was changed\n");
+        warning_with_guard(get_typename() + " Requested space size was changed\n");
         requested_size += blocks_sizes_difference;
         result_size = requested_size + meta_size;
     }
@@ -222,20 +205,10 @@ allocator_sorted_list::allocator_sorted_list(
         }
         else set_first_available_block(new_next);
     }
-    else
-    {
-        if (prev_target != nullptr)
-        {
-            void **next_block_adress = reinterpret_cast<void **>(prev_target);
-            *next_block_adress = next_target;
-        }
-        else
-        {
-            set_first_available_block(next_target);
-        }
-    }
+
     void ** prev_adress = reinterpret_cast<void**>(block);
     prev_adress = nullptr;
+    
     size_t * prev_size_ptr = reinterpret_cast<size_t*>(prev_adress + 1);
     prev_size_ptr = nullptr;
 
@@ -249,9 +222,9 @@ allocator_sorted_list::allocator_sorted_list(
     std::vector<allocator_test_utils::block_info> blocks_info = get_blocks_info();
     print_blocks_info(blocks_info);
 
-    information_with_guard(type + function + " available memory: " + std::to_string(available_memory));
+    information_with_guard(get_typename() + " Available memory: " + std::to_string(available_memory));
 
-    debug_with_guard("[End] " + type + function);
+    debug_with_guard(get_typename() + end + function);
     return result_block;
 }
 
@@ -273,13 +246,12 @@ std::string allocator_sorted_list::get_block_info(void * block) const noexcept
 void allocator_sorted_list::deallocate(void *at)
 {
     std::lock_guard<std::mutex> mutex_guard(get_mutex());
-    std::string function = " Deallocate\n";
-    std::string type = get_typename();
+    std::string function = "Deallocate\n";
 
-    debug_with_guard("[Begin] " + type + function);
+    debug_with_guard(get_typename() + start + function);
 
     std::string block_info_array = get_block_info(at);
-    debug_with_guard(type + function + " " + block_info_array);
+    debug_with_guard(get_typename() + "\n" + block_info_array);
 
     size_t meta_size = sizeof(allocator*) + sizeof(size_t);
 
@@ -290,8 +262,8 @@ void allocator_sorted_list::deallocate(void *at)
     
     if (get_occupied_block_allocator(block) != this)
     {
-        std::string error = "Block doesn't belong to this allocator";
-        error_with_guard(error);
+        std::string error = " Block doesn't belong to this allocator";
+        error_with_guard(get_typename() + error);
         throw std::logic_error(error);
     }
 
@@ -336,7 +308,7 @@ void allocator_sorted_list::deallocate(void *at)
         std::vector<allocator_test_utils::block_info> blocks_info = get_blocks_info();
         print_blocks_info(blocks_info);
 
-        debug_with_guard("[End] " + type + function);
+        debug_with_guard(get_typename() + end + function);
         return;
     }
     if (current_available == reinterpret_cast<unsigned char *>(block) +
@@ -401,9 +373,9 @@ void allocator_sorted_list::deallocate(void *at)
     std::vector<allocator_test_utils::block_info> blocks_info = get_blocks_info();
     print_blocks_info(blocks_info);
 
-    information_with_guard(type + function + " available memory: " + std::to_string(available_memory));
+    information_with_guard(get_typename() + " Available memory: " + std::to_string(available_memory));
 
-    debug_with_guard("[End] " + type + function);
+    debug_with_guard(get_typename() + end + function);
 }
 
 void allocator_sorted_list::print_blocks_info(std::vector<allocator_test_utils::block_info> blocks_info) const noexcept
@@ -437,9 +409,6 @@ inline allocator *allocator_sorted_list::get_allocator() const
 
 std::vector<allocator_test_utils::block_info> allocator_sorted_list::get_blocks_info() const noexcept
 {
-    std::string type = "[" + get_typename() + "] ";
-    std::string function = "Get blocks info\n";
-    trace_with_guard("[Begin] " + type + function);
     void * current_available = get_first_available_block();
     void * previous_available = nullptr;
     void * current_occupied = nullptr;
@@ -449,18 +418,12 @@ std::vector<allocator_test_utils::block_info> allocator_sorted_list::get_blocks_
 
     while (current_available != nullptr)
     {
-        if ((previous_available == nullptr && current_available != get_first_block()) || current_available == get_first_block()) 
-        {
-            current_occupied = get_first_block();
-        }
-        else
-        {
-            current_occupied = reinterpret_cast<unsigned char *>(previous_available) + sizeof(void*) + sizeof(size_t) + get_available_block_size(previous_available);
-        }
+        if (previous_available == nullptr) current_occupied = get_first_block();
+        else current_occupied = reinterpret_cast<unsigned char *>(previous_available) + sizeof(void*) + sizeof(size_t) + get_available_block_size(previous_available);
+
         while (current_occupied != current_available)
         {
             size_t occupied_size = get_occupied_block_size(current_occupied);
-
             allocator_test_utils::block_info occupied_block;
             occupied_block.block_size = occupied_size;
             occupied_block.is_block_occupied = true;
@@ -477,7 +440,6 @@ std::vector<allocator_test_utils::block_info> allocator_sorted_list::get_blocks_
         previous_available = current_available;
         current_available = get_available_block_next_block_address(current_available);
     }
-    trace_with_guard("[End] " + type + function);
     return blocks_info;
 }
 

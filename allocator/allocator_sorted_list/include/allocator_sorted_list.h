@@ -27,13 +27,13 @@ public:
         allocator_sorted_list const &other);
     
     allocator_sorted_list &operator=(
-        allocator_sorted_list const &other);
+        allocator_sorted_list const &other) = delete;
     
     allocator_sorted_list(
         allocator_sorted_list &&other) noexcept;
     
     allocator_sorted_list &operator=(
-        allocator_sorted_list &&other) noexcept;
+        allocator_sorted_list &&other) noexcept = delete;
 
 public:
     
