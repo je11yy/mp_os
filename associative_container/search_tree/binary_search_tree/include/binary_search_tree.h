@@ -11,7 +11,6 @@
 #include <not_implemented.h>
 #include <search_tree.h>
 #include <associative_container.h>
-
 #include <stack>
 
 template<typename tkey, typename tvalue>
@@ -1086,10 +1085,9 @@ protected:
             bool upper_bound_inclusive)
         {
             std::vector<typename associative_container<tkey, tvalue>::key_value_pair> range;
-
-            // TODO: this should be computed
             std::stack<node *> path;
             node *current = this->_tree->_root;
+            
             while (true)
             {
                 if (current == nullptr) break;
@@ -2538,6 +2536,7 @@ binary_search_tree<tkey, tvalue>::binary_search_tree(
     binary_search_tree<tkey, tvalue> const &other)
 {
     this->debug_with_guard("[BST] [START] Copy constructor\n");
+
     if (_root != nullptr) clear(_root);
     _root = copy(other._root);
 
@@ -2573,8 +2572,12 @@ template<typename tkey, typename tvalue>
 binary_search_tree<tkey, tvalue> &binary_search_tree<tkey, tvalue>::operator=(
     binary_search_tree<tkey, tvalue> const &other)
 {
-    this->debug_with_guard("[BST] [START] Copy operator\n");
-    if (this == &other) return *this;
+    this->debug_with_guard("[BST] [START] Assignment operator\n");
+    if (this == &other)
+    {
+        this->debug_with_guard("[BST] [END] Assignment operator\n");
+        return *this;
+    }
     if (_root != nullptr) clear(_root);
     _root = copy(other._root);
 
@@ -2585,7 +2588,7 @@ binary_search_tree<tkey, tvalue> &binary_search_tree<tkey, tvalue>::operator=(
     if (_obtaining_template != nullptr) delete _obtaining_template;
     _obtaining_template = new binary_search_tree<tkey, tvalue>::obtaining_template_method(*other._obtaining_template);
 
-    this->debug_with_guard("[BST] [END] Copy operator\n");
+    this->debug_with_guard("[BST] [END] Assignment operator\n");
     return *this;
 }
 
@@ -2593,8 +2596,12 @@ template<typename tkey, typename tvalue>
 binary_search_tree<tkey, tvalue> &binary_search_tree<tkey, tvalue>::operator=(
     binary_search_tree<tkey, tvalue> &&other) noexcept
 {
-    if (this == &other) return *this;
     this->debug_with_guard("[BST] [START] Move operator\n");
+    if (this == &other)
+    {
+        this->debug_with_guard("[BST] [END] Move operator\n");
+        return *this;
+    }
     if (_root != nullptr) clear(_root);
     _root = std::exchange(other._root, nullptr);
 
@@ -2895,9 +2902,9 @@ void binary_search_tree<tkey, tvalue>::big_left_rotation(
     bool validate) const
 {
     this->debug_with_guard("[BST] [START] Big Left Rotation");
-    small_left_rotation(subtree_root->right_subtree, validate);
+    small_right_rotation(subtree_root->right_subtree, validate);
     small_left_rotation(subtree_root, validate);
-    this->debug_with_guard("[BST] [START] Big Left Rotation");
+    this->debug_with_guard("[BST] [END] Big Left Rotation");
 }
 
 template<typename tkey, typename tvalue>
@@ -2906,9 +2913,9 @@ void binary_search_tree<tkey, tvalue>::big_right_rotation(
     bool validate) const
 {
     this->debug_with_guard("[BST] [START] Big Right Rotation");
-    small_right_rotation(subtree_root->left_subtree, validate);
+    small_left_rotation(subtree_root->left_subtree, validate);
     small_right_rotation(subtree_root, validate);
-    this->debug_with_guard("[BST] [START] Big Right Rotation");
+    this->debug_with_guard("[BST] [END] Big Right Rotation");
 }
 
 template<typename tkey, typename tvalue>
@@ -2919,17 +2926,11 @@ void binary_search_tree<tkey, tvalue>::double_left_rotation(
 {
     this->debug_with_guard("[BST] [START] Double Left Rotation");
 
-    if (at_grandparent_first)
-    {
-        small_left_rotation(subtree_root->left_subtree, validate);
-        small_right_rotation(subtree_root, validate);
-    }
-    else
-    {
-        small_left_rotation(subtree_root, validate);
-        small_right_rotation(subtree_root->left_subtree, validate);
-    }
-    this->debug_with_guard("[BST] [START] Double Left Rotation");
+    if (at_grandparent_first) small_left_rotation(subtree_root, validate);
+    else small_left_rotation(subtree_root -> right_subtree, validate);
+    small_left_rotation(subtree_root, validate);
+
+    this->debug_with_guard("[BST] [END] Double Left Rotation");
 }
 
 template<typename tkey, typename tvalue>
@@ -2939,19 +2940,56 @@ void binary_search_tree<tkey, tvalue>::double_right_rotation(
     bool validate) const
 {
     this->debug_with_guard("[BST] [START] Double Right Rotation");
-    if (at_grandparent_first)
-    {
-        small_right_rotation(subtree_root->right_subtree, validate);
-        small_left_rotation(subtree_root, validate);
-    }
-    else
-    {
-        small_right_rotation(subtree_root, validate);
-        small_left_rotation(subtree_root->right_subtree, validate);
-    }
-    this->debug_with_guard("[BST] [START] Double Right Rotation");
+    
+    if (at_grandparent_first) small_right_rotation(subtree_root, validate);
+    else small_right_rotation(subtree_root -> right_subtree, validate);
+    small_right_rotation(subtree_root, validate);
+
+    this->debug_with_guard("[BST] [END] Double Right Rotation");
 }
 
 // endregion subtree rotations implementation
 
 #endif //MATH_PRACTICE_AND_OPERATING_SYSTEMS_BINARY_SEARCH_TREE_H
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
