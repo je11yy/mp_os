@@ -1,22 +1,18 @@
 <head>
 </head>
 <body>
-    <h1 align="center"><font color="#398275">Completed tasks</font></h1>
-    <h2 align="center"><font color="#7db0a7">MP</font></h2>
-    <div>
-        <ul>
-            <big><li><a href="https://github.com/je11yy/mp_os/tree/Vlasova/logger/client_logger"><font color="#fff">Client logger</font></a></li></big>
-            <big><li><a href="https://github.com/je11yy/mp_os/tree/Vlasova/associative_container/search_tree/binary_search_tree/include"><font color="#fff">BST</font></a></li></big>
-            <big><li><a href="https://github.com/je11yy/mp_os/tree/Vlasova/associative_container/search_tree/binary_search_tree/AVL_tree"><font color="#fff">AVL</font></a></li></big>
-        </ul>
+    <h1 align="center">Completed tasks</h1>
+    <h2 align="center">MP</h2>
+    <div align="center">
+            <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/logger/client_logger">Client logger</a></big><br>
+            <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/associative_container/search_tree/binary_search_tree/include">BST</a></big><br>
+            <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/associative_container/search_tree/binary_search_tree/AVL_tree">AVL</a></big><br>
     </div>
-    <h2 align="center"><font color="#7db0a7">OS</font></h2>
-    <div>
-    <ul>
-            <big><li><a href="https://github.com/je11yy/mp_os/tree/Vlasova/logger/server_logger"><font color="#fff">Server logger</font></a></li></big>
-            <big><li><a href="https://github.com/je11yy/mp_os/tree/Vlasova/allocator/allocator_global_heap"><font color="#fff">Allocator global heap</font></a></li></big>
-            <big><li><a href="https://github.com/je11yy/mp_os/tree/Vlasova/allocator/allocator_sorted_list"><font color="#fff">Allocator sorted list</font></a></li></big>
-            <big><li><a href="https://github.com/je11yy/mp_os/tree/Vlasova/allocator/allocator_boundary_tagsr"><font color="#fff">Allocator boundary tags</font></a></li></big>
-        </ul>
+    <h2 align="center">OS</h2>
+    <div align="center">
+            <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/logger/server_logger">Server logger</a></big><br>
+            <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/allocator/allocator_global_heap">Allocator global heap</a></big><br>
+            <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/allocator/allocator_sorted_list">Allocator sorted list</a></big><br>
+            <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/allocator/allocator_boundary_tagsr">Allocator boundary tags</a></big><br>
     </div>
 </body>
