@@ -34,10 +34,34 @@ protected:
         
         explicit node(tkey const &key, tvalue const &value);
         explicit node(tkey const &key, tvalue &&value);
+
+        virtual unsigned char get_height() 
+        {
+            return 0;
+        }
+
+        virtual void set_height(unsigned char height)
+        {}
     };
 
 public:
-    
+
+    virtual size_t get_node_size() const
+    {
+        return sizeof(binary_search_tree<tkey, tvalue>::node);
+    }
+
+    virtual void call_node_constructor(typename binary_search_tree<tkey, tvalue>::node * raw_space, tkey const &key, tvalue const &value) const
+    {
+        allocator::construct(raw_space, key, value);
+    }
+
+    virtual void call_node_constructor(typename binary_search_tree<tkey, tvalue>::node * raw_space, tkey const &key, tvalue &&value) const
+    {
+        allocator::construct(raw_space, key, std::move(value));
+    }
+
+
     // region iterators definition
 
     struct iterator_data
@@ -95,14 +119,24 @@ public:
 
 public:
 
-    iterator_data * create_iterator_data(unsigned int depth, tkey const &key, tvalue const &value) const
+    virtual void call_iterator_data_construct(binary_search_tree<tkey, tvalue>::iterator_data * raw_space, binary_search_tree<tkey, tvalue>::node * subtree_root, unsigned int depth) const
+    {
+        allocator::construct(raw_space, depth, subtree_root->key, subtree_root->value);
+    }
+
+    virtual size_t get_iterator_data_size() const noexcept
+    {
+        return sizeof(binary_search_tree<tkey, tvalue>::iterator_data);
+    }
+
+    iterator_data * create_iterator_data(unsigned int depth, node *& ptr) const
     {
         this->trace_with_guard("[BST] Creating iterator data...\n");
         iterator_data * data = nullptr;
         try
         {
-            data = reinterpret_cast<iterator_data*>(this->allocate_with_guard(sizeof(iterator_data), 1));
-            allocator::construct(data, depth, key, value);
+            data = reinterpret_cast<iterator_data*>(this->allocate_with_guard(get_iterator_data_size(), 1));
+            call_iterator_data_construct(data, ptr, depth);
         }
         catch(const std::exception& e)
         {
@@ -119,7 +153,7 @@ public:
         this->deallocate_with_guard(data);
     }
 
-private:
+protected:
 
     void clear(node *&subtree_root)
     {
@@ -129,7 +163,7 @@ private:
         subtree_root->~node();
         this->deallocate_with_guard(subtree_root);
         subtree_root = nullptr;
-        this->trace_with_guard("[BST] Node was deleted\n");
+        this->trace_with_guard("Node was deleted\n");
     }
 
     node *copy(node const *subtree_root)
@@ -141,7 +175,7 @@ private:
         subtree_root_copied->left_subtree = copy(subtree_root->left_subtree);
         subtree_root_copied->right_subtree = copy(subtree_root->right_subtree);
 
-        this->trace_with_guard("[BST] Node was copied\n");
+        this->trace_with_guard("Node was copied\n");
         return subtree_root_copied;
     }
 
@@ -150,7 +184,7 @@ protected:
     void find_prefix_path(unsigned int depth, std::queue<typename binary_search_tree<tkey, tvalue>::iterator_data*> &way, binary_search_tree<tkey, tvalue>::node * ptr) const
     {
         if (ptr == nullptr) return;
-        way.push(this -> create_iterator_data(depth, ptr -> key, ptr -> value));
+        way.push(this -> create_iterator_data(depth, ptr));
         if (ptr -> left_subtree != nullptr) find_prefix_path(depth + 1, way, ptr -> left_subtree);
         if (ptr -> right_subtree != nullptr) find_prefix_path(depth + 1, way, ptr -> right_subtree);
     }
@@ -159,7 +193,7 @@ protected:
     {
         if (ptr == nullptr) return;
         if (ptr -> left_subtree != nullptr) find_infix_path(depth + 1, way, ptr -> left_subtree);
-        way.push(this -> create_iterator_data(depth, ptr -> key, ptr -> value));
+        way.push(this -> create_iterator_data(depth, ptr));
         if (ptr -> right_subtree != nullptr) find_infix_path(depth + 1, way, ptr -> right_subtree);
     }
 
@@ -168,7 +202,7 @@ protected:
         if (ptr == nullptr) return;
         if (ptr -> left_subtree != nullptr) find_postfix_path(depth + 1, way, ptr -> left_subtree);
         if (ptr -> right_subtree != nullptr) find_postfix_path(depth + 1, way, ptr -> right_subtree);
-        way.push(this -> create_iterator_data(depth, ptr -> key, ptr -> value));
+        way.push(this -> create_iterator_data(depth, ptr));
     }
 
     void clear_way(std::queue<typename binary_search_tree<tkey, tvalue>::iterator_data*> &way) const
@@ -998,6 +1032,8 @@ protected:
 
     protected:
 
+        virtual void balance(std::stack<node **> &path) {}
+
         std::stack<node **> find_path(tkey const &key) const
         {
             std::stack<node **> result_path;
@@ -1037,7 +1073,7 @@ protected:
 
         binary_search_tree<tkey, tvalue> *_tree;
 
-    private:
+    public:
 
         binary_search_tree<tkey, tvalue>::insertion_of_existent_key_attempt_strategy _insertion_strategy;
 
@@ -1056,7 +1092,7 @@ protected:
         void set_insertion_strategy(
             typename binary_search_tree<tkey, tvalue>::insertion_of_existent_key_attempt_strategy insertion_strategy) noexcept;
     
-    private:
+    protected:
         
         [[nodiscard]] allocator *get_allocator() const noexcept final;
         
@@ -1135,7 +1171,7 @@ protected:
 
         binary_search_tree<tkey, tvalue> *_tree;
 
-    private:
+    public:
 
         binary_search_tree<tkey, tvalue>::disposal_of_nonexistent_key_attempt_strategy _disposal_strategy;
     
@@ -1156,7 +1192,7 @@ protected:
         
         // TODO: think about it!
     
-    private:
+    protected:
 
         template<typename T>
         inline void swap(T &&one, T &&another)
@@ -1227,7 +1263,7 @@ public:
     void set_removal_strategy(
         typename binary_search_tree<tkey, tvalue>::disposal_of_nonexistent_key_attempt_strategy disposal_strategy) noexcept;
 
-private:
+public:
     
     node *_root = nullptr;
     insertion_template_method *_insertion_template = nullptr;
@@ -1288,7 +1324,7 @@ public:
     
     // endregion iterators requests definition
 
-protected:
+public:
     
     // region subtree rotations definition
     
@@ -1319,86 +1355,6 @@ protected:
         bool validate = true) const;
     
     // endregion subtree rotations definition
-
-public:
-
-    void print_tree(node * subtree_root, int space) const noexcept
-    {
-        // Base case
-        if (subtree_root == NULL) return;
-
-        int count = 4;
-    
-        // Increase distance between levels
-        space += count;
-    
-        // Process right child first
-        print_tree(subtree_root->right_subtree, space);
-    
-        // Print current node after space
-        // count
-        std::cout << std::endl;
-        for (int i = count; i < space; i++) std::cout << " ";
-        std::cout << subtree_root->key << "\n";
-    
-        // Process left child
-        print_tree(subtree_root->left_subtree, space);
-    }
-
-public:
-    void test_small_left_rotation()
-    {
-        std::cout << "\tSTART:\n";
-        print_tree(_root, 0);
-        std::cout << "\tSMALL LEFT ROTATION:\n";
-        small_left_rotation(_root, false);
-        print_tree(_root, 0);
-    }
-
-    void test_small_right_rotation()
-    {
-        std::cout << "\tSTART:\n";
-        print_tree(_root, 0);
-        std::cout << "\tSMALL RIGHT ROTATION:\n";
-        small_right_rotation(_root, false);
-        print_tree(_root, 0);
-    }
-
-    void test_big_left_rotation()
-    {
-        std::cout << "\tSTART:\n";
-        print_tree(_root, 0);
-        std::cout << "\tBIG LEFT ROTATION:\n";
-        big_left_rotation(_root, false);
-        print_tree(_root, 0);
-    }
-
-    void test_big_right_rotation()
-    {
-        std::cout << "\tSTART:\n";
-        print_tree(_root, 0);
-        std::cout << "\tBIG RIGHT ROTATION:\n";
-        big_right_rotation(_root, false);
-        print_tree(_root, 0);
-    }
-
-    void test_double_left_rotation()
-    {
-        std::cout << "\tSTART:\n";
-        print_tree(_root, 0);
-        std::cout << "\tDOUBLE LEFT ROTATION:\n";
-        double_left_rotation(_root, false, false);
-        print_tree(_root, 0);
-    }
-
-    void test_double_right_rotation()
-    {
-        std::cout << "\tSTART:\n";
-        print_tree(_root, 0);
-        std::cout << "\tDOUBLE RIGHT ROTATION:\n";
-        double_right_rotation(_root, false, true);
-        print_tree(_root, 0);
-    }
     
 };
 
@@ -1624,7 +1580,7 @@ template<typename tkey, typename tvalue>
 bool binary_search_tree<tkey, tvalue>::prefix_const_reverse_iterator::operator!=(
     typename binary_search_tree<tkey, tvalue>::prefix_const_reverse_iterator const &other) const noexcept
 {
-    _ptr != other._ptr;
+    return _ptr != other._ptr;
 }
 
 template<typename tkey, typename tvalue>
@@ -2193,85 +2149,37 @@ void binary_search_tree<tkey, tvalue>::insertion_template_method::insert(
     tvalue const &value)
 {
     this->trace_with_guard("[BST] Trying to insert new node...\n");
-    node * raw_space;
-    node * current = _tree->_root;
-
-    if (current == nullptr)
+    
+    auto path = this -> find_path(key);
+    if (*(path.top()))
     {
-        try
+        switch (_insertion_strategy)
         {
-            raw_space = reinterpret_cast<node *>(allocate_with_guard(sizeof(binary_search_tree::node), 1));
-            allocator::construct(raw_space, key, value);
+            case insertion_of_existent_key_attempt_strategy::throw_an_exception:
+                throw insertion_of_existent_key_attempt_exception(key);
+            case insertion_of_existent_key_attempt_strategy::update_value:
+                (*(path.top()))->value = value;
+                break;
         }
-        catch(const std::exception& e)
-        {
-            this->error_with_guard("[BST] BadAlloc corrupted while inserting node\n");
-            throw e;
-        }
-        current = raw_space;
-        _tree->_root = current;
-        this->trace_with_guard("[BST] Node was inserted\n");
+
         return;
     }
-    
-    while (current != nullptr && current->key != key)
+
+    node * raw_space = nullptr;
+
+    try
     {
-        if (key < current->key)
-        {
-            if (current->left_subtree != nullptr) current = current->left_subtree;
-            else
-            {
-                try
-                {
-                    raw_space = reinterpret_cast<node *>(allocate_with_guard(sizeof(binary_search_tree::node), 1));
-                    allocator::construct(raw_space, key, value);
-                }
-                catch(const std::exception& e)
-                {
-                    this->error_with_guard("[BST] BadAlloc corrupted while inserting node\n");
-                    throw e;
-                }
-                current->left_subtree = raw_space;
-                this->trace_with_guard("[BST] Node was inserted\n");
-                return;
-            }
-        }
-        else if (key > current->key)
-        {
-            if (current->right_subtree != nullptr) current = current->right_subtree;
-            else
-            {
-                try
-                {
-                    raw_space = reinterpret_cast<node *>(allocate_with_guard(sizeof(binary_search_tree::node), 1));
-                    allocator::construct(raw_space, key, value);
-                }
-                catch(const std::exception& e)
-                {
-                    this->error_with_guard("[BST] BadAlloc corrupted while inserting node\n");
-                    throw e;
-                }
-                current->right_subtree = raw_space;
-                this->trace_with_guard("[BST] Node was inserted\n");
-                return;
-            }
-        }
-        else
-        {
-            this->trace_with_guard("[BST] Node with this key already exists\n");
-            switch (_insertion_strategy)
-            {
-                case insertion_of_existent_key_attempt_strategy::throw_an_exception:
-                    throw insertion_of_existent_key_attempt_exception(key);
-                    break;
-                case insertion_of_existent_key_attempt_strategy::update_value:
-                    current->value = value;
-                    this->warning_with_guard("[BST] Node's value was updated\n");
-                    break;
-            }
-            return;
-        }
+        raw_space = reinterpret_cast<node *>(this->allocate_with_guard(_tree->get_node_size(), 1));
+        _tree->call_node_constructor(raw_space, key, value);
     }
+    catch(const std::exception& e)
+    {
+        this->error_with_guard("[BST] BadAlloc corrupted while inserting node\n");
+        throw e;
+    }
+    (*path.top()) = raw_space;
+    this->balance(path);
+    this->trace_with_guard("[BST] Node was inserted\n");
 }
 
 template<typename tkey, typename tvalue>
@@ -2280,85 +2188,35 @@ void binary_search_tree<tkey, tvalue>::insertion_template_method::insert(
     tvalue &&value)
 {
     this->trace_with_guard("[BST] Trying to insert new node...\n");
-    node * raw_space;
-    node * current = _tree->_root;
-
-    if (current == nullptr)
+    auto path = this -> find_path(key);
+    if (*(path.top()))
     {
-        try
+        switch (_insertion_strategy)
         {
-            raw_space = reinterpret_cast<node *>(allocate_with_guard(sizeof(binary_search_tree::node), 1));
-            allocator::construct(raw_space, key, value);
+            case insertion_of_existent_key_attempt_strategy::throw_an_exception:
+                throw insertion_of_existent_key_attempt_exception(key);
+            case insertion_of_existent_key_attempt_strategy::update_value:
+                (*(path.top()))->value = value;
+                break;
         }
-        catch(const std::exception& e)
-        {
-            this->error_with_guard("[BST] BadAlloc corrupted while inserting node\n");
-            throw e;
-        }
-        current = raw_space;
-        _tree->_root = current;
-        this->trace_with_guard("[BST] Node was inserted\n");
+
         return;
     }
 
-    while (current != nullptr)
+    node * raw_space = nullptr;
+    try
     {
-        if (key < current->key)
-        {
-            if (current->left_subtree != nullptr) current = current->left_subtree;
-            else
-            {
-                try
-                {
-                    raw_space = reinterpret_cast<node *>(allocate_with_guard(sizeof(binary_search_tree::node), 1));
-                    allocator::construct(raw_space, key, value);
-                }
-                catch(const std::exception& e)
-                {
-                    this->error_with_guard("[BST] BadAlloc corrupted while inserting node\n");
-                    throw e;
-                }
-                current->left_subtree = raw_space;
-                this->trace_with_guard("[BST] Node was inserted\n");
-                return;
-            }
-        }
-        else if (key > current->key)
-        {
-            if (current->right_subtree != nullptr) current = current->right_subtree;
-            else
-            {
-                try
-                {
-                    raw_space = reinterpret_cast<node *>(allocate_with_guard(sizeof(binary_search_tree::node), 1));
-                    allocator::construct(raw_space, key, value);
-                }
-                catch(const std::exception& e)
-                {
-                    this->error_with_guard("[BST] BadAlloc corrupted while inserting node\n");
-                    throw e;
-                }
-                current->right_subtree = raw_space;
-                this->trace_with_guard("[BST] Node was inserted\n");
-                return;
-            }
-        }
-        else
-        {
-            this->trace_with_guard("[BST] Node with this key already exists\n");
-            switch (_insertion_strategy)
-            {
-                case insertion_of_existent_key_attempt_strategy::throw_an_exception:
-                    throw insertion_of_existent_key_attempt_exception(key);
-                    break;
-                case insertion_of_existent_key_attempt_strategy::update_value:
-                    current->value = std::move(value);
-                    this->warning_with_guard("[BST] Node's value was updated\n");
-                    break;
-            }
-            return;
-        }
+        raw_space = reinterpret_cast<node *>(this->allocate_with_guard(_tree->get_node_size(), 1));
+        _tree->call_node_constructor(raw_space, key, std::move(value));
     }
+    catch(const std::exception& e)
+    {
+        this->error_with_guard("[BST] BadAlloc corrupted while inserting node\n");
+        throw e;
+    }
+    (*path.top()) = raw_space;
+    this->balance(path);
+    this->trace_with_guard("[BST] Node was inserted\n");
 }
 
 template<typename tkey, typename tvalue>
@@ -2472,6 +2330,9 @@ tvalue binary_search_tree<tkey, tvalue>::disposal_template_method::dispose(
     deallocate_with_guard(*(path.top()));
 
     *(path.top()) = leftover_subtree;
+
+    this->balance(path);
+
     this->trace_with_guard("[BST] Node was successfully removed\n");
     return value;
 }
@@ -2635,9 +2496,9 @@ void binary_search_tree<tkey, tvalue>::insert(
     tkey const &key,
     tvalue const &value)
 {
-    this->debug_with_guard("[BST] [START] Insert\n");
+    this->debug_with_guard("[START] Insert\n");
     _insertion_template->insert(key, value);
-    this->debug_with_guard("[BST] [END] Insert\n");
+    this->debug_with_guard("[END] Insert\n");
 }
 
 template<typename tkey, typename tvalue>
@@ -2645,18 +2506,18 @@ void binary_search_tree<tkey, tvalue>::insert(
     tkey const &key,
     tvalue &&value)
 {
-    this->debug_with_guard("[BST] [START] Insert with moving\n");
+    this->debug_with_guard("[START] Insert with moving\n");
     _insertion_template->insert(key, std::move(value));
-    this->debug_with_guard("[BST] [END] Insert with moving\n");
+    this->debug_with_guard("[END] Insert with moving\n");
 }
 
 template<typename tkey, typename tvalue>
 tvalue const &binary_search_tree<tkey, tvalue>::obtain(
     tkey const &key)
 {
-    this->debug_with_guard("[BST] [START] Obtain\n");
+    this->debug_with_guard("[START] Obtain\n");
     return _obtaining_template->obtain(key);
-    this->debug_with_guard("[BST] [END] Obtain\n");
+    this->debug_with_guard("[END] Obtain\n");
 }
 
 template<typename tkey, typename tvalue>
@@ -2674,7 +2535,7 @@ template<typename tkey, typename tvalue>
 tvalue binary_search_tree<tkey, tvalue>::dispose(
     tkey const &key)
 {
-    this->debug_with_guard("[BST] Dispose\n");
+    this->debug_with_guard("Dispose\n");
     return _disposal_template->dispose(key);
 }
 
@@ -2684,18 +2545,18 @@ template<typename tkey, typename tvalue>
 void binary_search_tree<tkey, tvalue>::set_insertion_strategy(
     typename binary_search_tree<tkey, tvalue>::insertion_of_existent_key_attempt_strategy insertion_strategy) noexcept
 {
-    this->trace_with_guard("[BST] [START] Set insertion strategy\n");
+    this->trace_with_guard("[START] Set insertion strategy\n");
     _insertion_template->set_insertion_strategy(insertion_strategy);
-    this->trace_with_guard("[BST] [END] Set insertion strategy\n");
+    this->trace_with_guard("[END] Set insertion strategy\n");
 }
 
 template<typename tkey, typename tvalue>
 void binary_search_tree<tkey, tvalue>::set_removal_strategy(
     typename binary_search_tree<tkey, tvalue>::disposal_of_nonexistent_key_attempt_strategy disposal_strategy) noexcept
 {
-    this->trace_with_guard("[BST] [START] Set removal strategy\n");
+    this->trace_with_guard("[START] Set removal strategy\n");
     _disposal_template->set_disposal_strategy(disposal_strategy);
-    this->trace_with_guard("[BST] [END] Set removal strategy\n");
+    this->trace_with_guard("[END] Set removal strategy\n");
 }
 
 // region iterators requesting implementation
@@ -2854,10 +2715,15 @@ void binary_search_tree<tkey, tvalue>::small_left_rotation(
     binary_search_tree<tkey, tvalue>::node *&subtree_root,
     bool validate) const
 {
-    this->debug_with_guard("[BST] [START] Small Left Rotation");
-    if (validate && subtree_root == nullptr || subtree_root->right_subtree == nullptr)
+    this->debug_with_guard("[START] Small Left Rotation");
+    if (subtree_root == nullptr)
     {
-        std::string error = "[BST] Can't perform rotation\n";
+        this->debug_with_guard("[END] Small Left Rotation");
+        return;
+    }
+    if (validate && subtree_root->right_subtree == nullptr)
+    {
+        std::string error = "Can't perform rotation\n";
         this->error_with_guard(error);
         throw std::logic_error(error);
     }
@@ -2867,7 +2733,7 @@ void binary_search_tree<tkey, tvalue>::small_left_rotation(
     new_root->left_subtree = subtree_root;
     subtree_root = new_root;
 
-    this->debug_with_guard("[BST] [END] Small Left Rotation");
+    this->debug_with_guard("[END] Small Left Rotation");
 }
 
 template<typename tkey, typename tvalue>
@@ -2875,10 +2741,15 @@ void binary_search_tree<tkey, tvalue>::small_right_rotation(
     binary_search_tree<tkey, tvalue>::node *&subtree_root,
     bool validate) const
 {
-    this->debug_with_guard("[BST] [START] Small Right Rotation");
-    if (validate && subtree_root == nullptr || subtree_root->left_subtree == nullptr)
+    this->debug_with_guard("[START] Small Right Rotation");
+    if (subtree_root == nullptr)
     {
-        std::string error = "[BST] Can't perform rotation\n";
+        this->debug_with_guard("[END] Small Right Rotation");
+        return;
+    }
+    if (validate && subtree_root->left_subtree == nullptr)
+    {
+        std::string error = "Can't perform rotation\n";
         this->error_with_guard(error);
         throw std::logic_error(error);
     }
@@ -2887,13 +2758,7 @@ void binary_search_tree<tkey, tvalue>::small_right_rotation(
     new_root->right_subtree = subtree_root;
     subtree_root = new_root;
 
-    if (validate && !validation(subtree_root))
-    {
-        std::string error = "[BST] Tree is not valid after performing rotation\n";
-        this->error_with_guard(error);
-        throw std::logic_error(error);
-    }
-    this->debug_with_guard("[BST] [END] Small Right Rotation");
+    this->debug_with_guard("[END] Small Right Rotation");
 }
 
 template<typename tkey, typename tvalue>
@@ -2901,10 +2766,24 @@ void binary_search_tree<tkey, tvalue>::big_left_rotation(
     binary_search_tree<tkey, tvalue>::node *&subtree_root,
     bool validate) const
 {
-    this->debug_with_guard("[BST] [START] Big Left Rotation");
-    small_right_rotation(subtree_root->right_subtree, validate);
-    small_left_rotation(subtree_root, validate);
-    this->debug_with_guard("[BST] [END] Big Left Rotation");
+    this->debug_with_guard("[START] Big Left Rotation");
+    if (subtree_root == nullptr)
+    {
+        this->debug_with_guard("[END] Big Left Rotation");
+        return;
+    }
+
+    try
+    {
+        small_right_rotation(subtree_root->right_subtree, validate);
+        small_left_rotation(subtree_root, validate);
+    }
+    catch(const std::logic_error & e)
+    {
+        throw e;
+    }
+    
+    this->debug_with_guard("[END] Big Left Rotation");
 }
 
 template<typename tkey, typename tvalue>
@@ -2912,10 +2791,24 @@ void binary_search_tree<tkey, tvalue>::big_right_rotation(
     binary_search_tree<tkey, tvalue>::node *&subtree_root,
     bool validate) const
 {
-    this->debug_with_guard("[BST] [START] Big Right Rotation");
-    small_left_rotation(subtree_root->left_subtree, validate);
-    small_right_rotation(subtree_root, validate);
-    this->debug_with_guard("[BST] [END] Big Right Rotation");
+    this->debug_with_guard("[START] Big Right Rotation");
+    if (subtree_root == nullptr)
+    {
+        this->debug_with_guard("[END] Big Right Rotation");
+        return;
+    }
+
+    try
+    {
+        small_left_rotation(subtree_root->left_subtree, validate);
+        small_right_rotation(subtree_root, validate);
+    }
+    catch(const std::logic_error& e)
+    {
+        throw e;
+    }
+
+    this->debug_with_guard("[END] Big Right Rotation");
 }
 
 template<typename tkey, typename tvalue>
@@ -2924,13 +2817,19 @@ void binary_search_tree<tkey, tvalue>::double_left_rotation(
     bool at_grandparent_first,
     bool validate) const
 {
-    this->debug_with_guard("[BST] [START] Double Left Rotation");
+    this->debug_with_guard("[START] Double Left Rotation");
+    try
+    {
+        if (at_grandparent_first) small_left_rotation(subtree_root, validate);
+        else small_left_rotation(subtree_root -> right_subtree, validate);
+        small_left_rotation(subtree_root, validate);
+    }
+    catch(const std::logic_error& e)
+    {
+        throw e;
+    }
 
-    if (at_grandparent_first) small_left_rotation(subtree_root, validate);
-    else small_left_rotation(subtree_root -> right_subtree, validate);
-    small_left_rotation(subtree_root, validate);
-
-    this->debug_with_guard("[BST] [END] Double Left Rotation");
+    this->debug_with_guard("[END] Double Left Rotation");
 }
 
 template<typename tkey, typename tvalue>
@@ -2939,13 +2838,20 @@ void binary_search_tree<tkey, tvalue>::double_right_rotation(
     bool at_grandparent_first,
     bool validate) const
 {
-    this->debug_with_guard("[BST] [START] Double Right Rotation");
+    this->debug_with_guard("[START] Double Right Rotation");
     
-    if (at_grandparent_first) small_right_rotation(subtree_root, validate);
-    else small_right_rotation(subtree_root -> right_subtree, validate);
-    small_right_rotation(subtree_root, validate);
+    try
+    {
+        if (at_grandparent_first) small_right_rotation(subtree_root, validate);
+        else small_right_rotation(subtree_root -> right_subtree, validate);
+        small_right_rotation(subtree_root, validate);
+    }
+    catch(const std::logic_error& e)
+    {
+        throw e;
+    }
 
-    this->debug_with_guard("[BST] [END] Double Right Rotation");
+    this->debug_with_guard("[END] Double Right Rotation");
 }
 
 // endregion subtree rotations implementation

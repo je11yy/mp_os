@@ -1,4 +1,4 @@
-[TRACE] binarySearchTreePositiveTests.test11 started
+[TRACE] AVLTreePositiveTests.test11 started
 
 [TRACE] [BST] Trying to insert new node...
 
@@ -96,7 +96,7 @@
 [TRACE] [BST] Iterator data was successfully created
 
 
-[TRACE] binarySearchTreePositiveTests.test11 finished
+[TRACE] AVLTreePositiveTests.test11 finished
 
 [TRACE] Node was deleted
 
