@@ -14,5 +14,6 @@
             <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/allocator/allocator_global_heap">Allocator global heap</a></big><br>
             <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/allocator/allocator_sorted_list">Allocator sorted list</a></big><br>
             <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/allocator/allocator_boundary_tagsr">Allocator boundary tags</a></big><br>
+            <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/allocator/allocator_buddies_system">Allocator buddies system</a></big><br>
     </div>
 </body>
