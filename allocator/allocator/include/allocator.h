@@ -2,15 +2,16 @@
 #define MATH_PRACTICE_AND_OPERATING_SYSTEMS_ALLOCATOR_H
 
 #include <cstddef>
+#include <utility>
 
 class allocator
 {
 
 public:
     
-    typedef size_t block_size_t;
+    using block_size_t = size_t;
     
-    typedef void *block_pointer_t;
+    using block_pointer_t = void *;
 
 public:
     
@@ -35,7 +36,7 @@ public:
 template<typename T, typename ...args>
 inline void allocator::construct(T *at, args... constructor_arguments)
 {
-    new(at) T(constructor_arguments...);
+    new (at) T(std::forward<Args>(constructor_arguments)...);
 }
 
 template<typename T>
