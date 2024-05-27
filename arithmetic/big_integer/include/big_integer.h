@@ -4,13 +4,16 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <cstring>
+#include <algorithm>
 
 #include <allocator.h>
 #include <allocator_guardant.h>
 #include <not_implemented.h>
 
-class big_integer final:
-    allocator_guardant
+#define DF_base "4294967296"
+
+class big_integer final
 {
 
 public:
@@ -164,24 +167,40 @@ private:
 private:
 
     int _oldest_digit;
-    unsigned int *_other_digits;
-    allocator *_allocator;
+    unsigned int *_other_digits = nullptr;
+
+    multiplication * _multiplication_method = nullptr;
+    division * _division_method = nullptr;
+
+private:
+
+    void copy_from(
+        big_integer const &other);
+
+    void initialize_from(
+        int const *digits,
+        size_t digits_count);
+
+    void initialize_from(
+        std::vector<int> const &digits,
+        size_t digits_count);
+
+    void initialize_from(
+        std::string const &value_as_string,
+        size_t base = 10);
 
 public:
 
     big_integer(
         int const *digits,
-        size_t digits_count,
-        allocator *allocator = nullptr);
+        size_t digits_count);
 
     explicit big_integer(
-        std::vector<int> const &digits,
-        allocator *allocator = nullptr);
+        std::vector<int> const &digits);
 
     explicit big_integer(
         std::string const &value_as_string,
-        size_t base = 10,
-        allocator *allocator = nullptr);
+        size_t base = 10);
 
 public:
 
@@ -192,12 +211,6 @@ public:
 
     big_integer &operator=(
         big_integer const &other);
-    
-    big_integer(
-        big_integer &&other) noexcept;
-    
-    big_integer &operator=(
-        big_integer &&other) noexcept;
 
 public:
 
@@ -373,7 +386,31 @@ public:
 
 private:
 
-    [[nodiscard]] allocator *get_allocator() const noexcept override;
+    size_t default_base = 1 << (8 * sizeof(int) - 1);
+
+public:
+
+    inline int sign() const noexcept;
+
+    inline bool is_zero() const noexcept;
+
+    inline unsigned int get_digit(int index) const noexcept;
+
+    inline int get_size() const noexcept;
+
+private:
+
+    big_integer &change_sign();
+
+    std::vector<int> convert_to_base(std::string const & value_as_string, size_t base);
+
+    std::vector<int> convert_string_to_vector(std::string value_as_string, size_t index);
+
+    void clear();
+
+    std::string big_integer_to_string(big_integer const & value) const;
+
+    int big_int_cmp(big_integer const & first, big_integer const & second) const;
     
 };
 
