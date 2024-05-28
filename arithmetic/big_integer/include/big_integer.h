@@ -13,7 +13,8 @@
 
 #define DF_base "4294967296"
 
-class big_integer final
+class big_integer final:
+    allocator_guardant
 {
 
 public:
@@ -113,6 +114,7 @@ private:
     class trivial_division final:
         public division
     {
+
     
     public:
         
@@ -169,8 +171,7 @@ private:
     int _oldest_digit;
     unsigned int *_other_digits = nullptr;
 
-    multiplication * _multiplication_method = nullptr;
-    division * _division_method = nullptr;
+    allocator *_allocator = nullptr;
 
 private:
 
@@ -193,14 +194,17 @@ public:
 
     big_integer(
         int const *digits,
-        size_t digits_count);
+        size_t digits_count,
+        allocator *allocator = nullptr);
 
     explicit big_integer(
-        std::vector<int> const &digits);
+        std::vector<int> const &digits,
+        allocator *allocator = nullptr);
 
     explicit big_integer(
         std::string const &value_as_string,
-        size_t base = 10);
+        size_t base = 10,
+        allocator *allocator = nullptr);
 
 public:
 
@@ -211,6 +215,12 @@ public:
 
     big_integer &operator=(
         big_integer const &other);
+    
+    big_integer(
+        big_integer &&other) noexcept;
+    
+    big_integer &operator=(
+        big_integer &&other) noexcept;
 
 public:
 
@@ -388,6 +398,10 @@ private:
 
     size_t default_base = 1 << (8 * sizeof(int) - 1);
 
+private:
+
+    [[nodiscard]] allocator *get_allocator() const noexcept override;
+
 public:
 
     inline int sign() const noexcept;
@@ -402,13 +416,15 @@ private:
 
     big_integer &change_sign();
 
-    std::vector<int> convert_to_base(std::string const & value_as_string, size_t base);
-
     std::vector<int> convert_string_to_vector(std::string value_as_string, size_t index);
 
     void clear();
 
+public:
+
     std::string big_integer_to_string(big_integer const & value) const;
+
+private:
 
     int big_int_cmp(big_integer const & first, big_integer const & second) const;
     
