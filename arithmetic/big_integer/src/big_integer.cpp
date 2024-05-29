@@ -78,7 +78,7 @@ std::string string_divide(const std::string & first, const std::string & second)
     if (second == "0") throw std::logic_error("Division by zero is not defined\n");
     if (first == "0") return "0";
 
-    bool negative = (first[0] == '0') ^ (second[0] == '-');
+    bool negative = (first[0] == '-') ^ (second[0] == '-');
 
     std::string dividend = (first[0] == '-') ? first.substr(1) : first;
     std::string divisor = (second[0] == '-') ? second.substr(1) : second;
@@ -137,18 +137,7 @@ std::string big_integer::big_integer_to_string(big_integer const & value) const
 
     if (value.is_zero()) return res;
 
-    if (!value._other_digits) 
-    {
-        if (value.sign() == -1) return "-" + std::to_string(value._oldest_digit);
-        else return std::to_string(value._oldest_digit);
-    }
-
     int size = value.get_size();
-    if (size == 1) 
-    {
-        if (value.sign() == -1) return "-" + std::to_string(value._oldest_digit);
-        else return std::to_string(value._oldest_digit);
-    }
 
     unsigned int i;
     for (i = 1; i < size; ++i) 
@@ -156,7 +145,7 @@ std::string big_integer::big_integer_to_string(big_integer const & value) const
         res = string_add(res, string_mult(std::to_string(value._other_digits[i]), string_pow(i - 1, DF_base)));
     }
 
-    if (value.sign() == -1) 
+    if (value.sign()  < 0) 
     {
         int old_d = value._oldest_digit;
         old_d = old_d ^ (1 << ((sizeof(int) << 3) - 1));
@@ -175,7 +164,7 @@ int big_integer::big_int_cmp(big_integer const & first, big_integer const & seco
     bool second_negative = (second.sign() == -1);
 
     if (first_negative && !second_negative) return -1;
-    if (!first_negative && second_negative) return -1;
+    if (!first_negative && second_negative) return 1;
 
 
     big_integer first_copy(first);
@@ -210,7 +199,7 @@ int char_to_int(char c)
     throw std::invalid_argument("Invalid character in string\n");
 }
 
-std::string string_to_decimal(const std::string& number, int base) 
+std::string big_integer::string_to_decimal(const std::string& number, int base) 
 {
     if (base < 2 or base > 36) throw std::invalid_argument("Base must be in the range [2...36]");
 
@@ -238,7 +227,7 @@ big_integer &big_integer::trivial_multiplication::multiply(
 
     bool negative;
 
-    if (first_multiplier.sign() == -1 && second_copy.sign() == 1 || first_multiplier.sign() == 1 && second_copy.sign() == -1)
+    if ((first_multiplier.sign() == -1 && second_copy.sign() == 1) || (first_multiplier.sign() == 1 && second_copy.sign() == -1))
     {
         negative = true;
         first_multiplier.sign() == -1 ? first_multiplier.change_sign() : second_copy.change_sign();
@@ -253,6 +242,8 @@ big_integer &big_integer::trivial_multiplication::multiply(
 
     int first_size = first_multiplier.get_size();
     int second_size = second_copy.get_size();
+    unsigned int const max_int = -1;
+    size_t base = static_cast<size_t>(max_int) + 1;
     
     constexpr int shift = sizeof(unsigned int) << 2;
     constexpr unsigned int mask = (1U << shift) - 1;
@@ -264,32 +255,18 @@ big_integer &big_integer::trivial_multiplication::multiply(
         unsigned int remainder = 0;
         unsigned int first_number_half;
 
-        if (i % 2 == 0)
-        {
-            auto number = first_multiplier.get_digit(i / 2);
-            first_number_half = number & mask;
-        }
-        else
-        {
-            auto number = first_multiplier.get_digit(i / 2);
-            first_number_half = (number >> shift) & mask;
-        }
-
+        auto number_1 = first_multiplier.get_digit(i / 2);
+        if (i % 2 == 0) first_number_half = number_1 & mask;
+        else first_number_half = (number_1 >> shift) & mask;
+        if (first_number_half == 0) continue;
         for (auto j = 0; j < 2 * second_size; ++j)
         {
             std::vector<int> digits_array;
             unsigned int second_number_half;
 
-            if (j % 2 == 0)
-            {
-                auto number = second_copy.get_digit(j / 2);
-                second_number_half = number & mask;
-            }
-            else
-            {
-                auto number = second_copy.get_digit(j / 2);
-                second_number_half = (number >> shift) & mask;
-            }
+            auto number_2 = second_copy.get_digit(j / 2);
+            if (j % 2 == 0) second_number_half = number_2 & mask;
+            else second_number_half = (number_2 >> shift) & mask;
 
             unsigned int operation_result = (first_number_half * second_number_half + remainder) & mask;
             remainder = (first_number_half * second_number_half + remainder) >> shift;
@@ -297,7 +274,6 @@ big_integer &big_integer::trivial_multiplication::multiply(
             digits_array.push_back(operation_result);
 
             big_integer multiply_result(digits_array);
-
             multiply_result <<= (shift * (i + j));;
             result += multiply_result;
         }
@@ -461,6 +437,22 @@ std::vector<int> big_integer::convert_string_to_vector(std::string value_as_stri
     return result;
 }
 
+std::vector<int> big_integer::convert_to_base(std::string const &value_as_string, size_t base)
+{
+    int pos = 0;
+    std::string value = value_as_string;
+    if (value[0] == '-') pos = 1;
+    while (value[pos] == '0' && ((pos == 0 && value.length() > 1) || (pos == 1 && value.length() > 2))) value.erase(pos, 1);
+
+    std::vector<int> result = convert_string_to_vector(value, pos);
+    if ((result[result.size() - 1] & (1 << ((sizeof(unsigned int) << 3) - 1))) != 0) result.push_back(0);
+
+    if (value[0] == '-' && value[1] != '0') result[result.size() - 1] |= default_base;
+
+    return result;
+
+}
+
 void big_integer::copy_from(
     big_integer const &other)
 {
@@ -531,20 +523,7 @@ void big_integer::initialize_from(
     std::string const &value_as_string,
     size_t base)
 {
-    if (base < 2 or base > 36) throw std::logic_error("Base must be in range [2..36]\n");
-    if (value_as_string.empty()) throw std::logic_error("String value must not be empty\n");
-
-    std::string value = value_as_string;
-
-    while (value[0] == '0' and value.size() > 1) value.erase(0, 1);
-
-    int index = 0;
-    if (value_as_string[0] == '-') index = 1;
-
-    std::string decimal_value = value;
-    if (base != 10) decimal_value = string_to_decimal(value, base);
-
-    std::vector<int> res = convert_string_to_vector(decimal_value, index);
+    std::vector<int> res = convert_to_base(value_as_string, base);
     initialize_from(res, res.size());
 }
 
@@ -569,7 +548,6 @@ big_integer::big_integer(
     allocator * allocator) : _allocator(allocator)
 {
     initialize_from(value_as_string, base);
-    if (value_as_string[0] == '-') change_sign();
 }
 
 void big_integer::clear()
@@ -742,7 +720,13 @@ big_integer big_integer::operator+(
 big_integer big_integer::operator+(
     std::pair<big_integer, allocator *> const &other) const
 {
-    throw not_implemented("big_integer big_integer::operator+(std::pair<big_integer, allocator *> const &) const", "your code should be here...");
+    big_integer tmp("0", 10, other.second);
+    if (_other_digits)
+    {
+        tmp._other_digits = static_cast<uint *>(tmp.allocate_with_guard(sizeof(uint), get_size()));
+        std::memcpy(tmp._other_digits, _other_digits, sizeof(uint) * (get_size()));
+    }
+    return tmp += other.first;
 }
 
 big_integer &big_integer::operator-=(
@@ -850,13 +834,16 @@ big_integer big_integer::operator-(
     return big_integer(*this) -= other;
 }
 
-/*
-    в чем смысл?
-*/
 big_integer big_integer::operator-(
     std::pair<big_integer, allocator *> const &other) const
 {
-    // что тут должно быть?
+    big_integer tmp("0", 10, other.second);
+    if (_other_digits)
+    {
+        tmp._other_digits = static_cast<uint *>(tmp.allocate_with_guard(sizeof(uint), get_size()));
+        std::memcpy(tmp._other_digits, _other_digits, sizeof(uint) * (get_size()));
+    }
+    return tmp -= other.first;
 }
 
 big_integer &big_integer::operator*=(
@@ -874,7 +861,13 @@ big_integer big_integer::operator*(
 big_integer big_integer::operator*(
     std::pair<big_integer, allocator *> const &other) const
 {
-    // ??
+    big_integer tmp("0", 10, other.second);
+    if (_other_digits)
+    {
+        tmp._other_digits = static_cast<uint *>(tmp.allocate_with_guard(sizeof(uint), get_size()));
+        std::memcpy(tmp._other_digits, _other_digits, sizeof(uint) * (get_size()));
+    }
+    return tmp *= other.first;
 }
 
 big_integer &big_integer::operator/=(
@@ -892,7 +885,13 @@ big_integer big_integer::operator/(
 big_integer big_integer::operator/(
     std::pair<big_integer, allocator *> const &other) const
 {
-    throw not_implemented("big_integer big_integer::operator/(std::pair<big_integer, allocator *> const &) const", "your code should be here...");
+    big_integer tmp("0", 10, other.second);
+    if (_other_digits)
+    {
+        tmp._other_digits = static_cast<uint *>(tmp.allocate_with_guard(sizeof(uint), get_size()));
+        std::memcpy(tmp._other_digits, _other_digits, sizeof(uint) * (get_size()));
+    }
+    return tmp /= other.first;
 }
 
 big_integer &big_integer::operator%=(
@@ -912,7 +911,13 @@ big_integer big_integer::operator%(
 big_integer big_integer::operator%(
     std::pair<big_integer, allocator *> const &other) const
 {
-    throw not_implemented("big_integer big_integer::operator%(std::pair<big_integer, allocator *> const &) const", "your code should be here...");
+    big_integer tmp("0", 10, other.second);
+    if (_other_digits)
+    {
+        tmp._other_digits = static_cast<uint *>(tmp.allocate_with_guard(sizeof(uint), get_size()));
+        std::memcpy(tmp._other_digits, _other_digits, sizeof(uint) * (get_size()));
+    }
+    return tmp %= other.first;
 }
 
 big_integer big_integer::operator~() const
@@ -957,7 +962,13 @@ big_integer big_integer::operator&(
 big_integer big_integer::operator&(
     std::pair<big_integer, allocator *> const &other) const
 {
-    throw not_implemented("big_integer big_integer::operator&(std::pair<big_integer, allocator *> const &) const", "your code should be here...");
+    big_integer tmp("0", 10, other.second);
+    if (_other_digits)
+    {
+        tmp._other_digits = static_cast<uint *>(tmp.allocate_with_guard(sizeof(uint), get_size()));
+        std::memcpy(tmp._other_digits, _other_digits, sizeof(uint) * (get_size()));
+    }
+    return tmp &= other.first;
 }
 
 big_integer &big_integer::operator|=(
@@ -988,7 +999,13 @@ big_integer big_integer::operator|(
 big_integer big_integer::operator|(
     std::pair<big_integer, allocator *> const &other) const
 {
-    throw not_implemented("big_integer big_integer::operator|(std::pair<big_integer, allocator *> const &) const", "your code should be here...");
+    big_integer tmp("0", 10, other.second);
+    if (_other_digits)
+    {
+        tmp._other_digits = static_cast<uint *>(tmp.allocate_with_guard(sizeof(uint), get_size()));
+        std::memcpy(tmp._other_digits, _other_digits, sizeof(uint) * (get_size()));
+    }
+    return tmp |= other.first;
 }
 
 big_integer &big_integer::operator^=(
@@ -1020,7 +1037,13 @@ big_integer big_integer::operator^(
 big_integer big_integer::operator^(
     std::pair<big_integer, allocator *> const &other) const
 {
-    throw not_implemented("big_integer big_integer::operator^(std::pair<big_integer, allocator *> const &) const", "your code should be here...");
+    big_integer tmp("0", 10, other.second);
+    if (_other_digits)
+    {
+        tmp._other_digits = static_cast<uint *>(tmp.allocate_with_guard(sizeof(uint), get_size()));
+        std::memcpy(tmp._other_digits, _other_digits, sizeof(uint) * (get_size()));
+    }
+    return tmp ^= other.first;
 }
 
 big_integer &big_integer::operator<<=(
@@ -1113,25 +1136,90 @@ big_integer big_integer::operator<<(
 big_integer big_integer::operator<<(
     std::pair<size_t, allocator *> const &shift) const
 {
-    throw not_implemented("big_integer big_integer::operator<<(std::pair<size_t, allocator *> const &) const", "your code should be here...");
+    big_integer tmp("0", 10, shift.second);
+    if (_other_digits)
+    {
+        tmp._other_digits = static_cast<uint *>(tmp.allocate_with_guard(sizeof(uint), get_size()));
+        std::memcpy(tmp._other_digits, _other_digits, sizeof(uint) * (get_size()));
+    }
+    return tmp <<= shift.first;
 }
 
 big_integer &big_integer::operator>>=(
     size_t shift)
 {
-    throw not_implemented("big_integer &big_integer::operator>>=(size_t)", "your code should be here...");
+    if (is_zero() || shift == 0) return *this;
+
+    auto value_sign = sign();
+    if (value_sign < 0) change_sign();
+
+    auto const to_remove = shift / (sizeof(unsigned int) << 3);
+
+    shift %= (sizeof(unsigned int) << 3);
+
+    if (to_remove > 0) 
+    {
+        if (to_remove >= *_other_digits) 
+        {
+            deallocate_with_guard(_other_digits);
+            _other_digits = nullptr;
+            _oldest_digit = 0;
+            return *this;
+        }
+
+        auto new_size = *_other_digits - to_remove;
+        unsigned int * new_digits;
+        try
+        {
+            new_digits = static_cast<uint *>(allocate_with_guard(sizeof(uint), new_size + 1));
+        }
+        catch(const std::bad_alloc& e)
+        {
+            throw e;
+        }
+        
+        std::memcpy(new_digits + 1, _other_digits + 1 + to_remove, sizeof(unsigned int) * (new_size - 1));
+        *new_digits = new_size;
+        deallocate_with_guard(_other_digits);
+        _other_digits = new_digits;
+    }
+
+    if (shift) 
+    {
+        unsigned int part_to_move_to_previous_digit = 0;
+        auto const digits_count = get_size();
+        for (auto i = digits_count - 1; i >= 0; --i) 
+        {
+            unsigned int * digit_address;
+            if (i == digits_count - 1) digit_address = reinterpret_cast<unsigned int *>(&_oldest_digit);
+            else digit_address = _other_digits + i + 1;
+
+            unsigned int current_digit = get_digit(i);
+            *(digit_address) >>= shift;
+            *(digit_address) |= part_to_move_to_previous_digit;
+            part_to_move_to_previous_digit = (current_digit << ((sizeof(unsigned int) << 3) - shift));
+        }
+    }
+    if (value_sign == -1) change_sign();
+    return *this;
 }
 
 big_integer big_integer::operator>>(
     size_t shift) const
 {
-    throw not_implemented("big_integer big_integer::operator>>(size_t) const", "your code should be here...");
+    return big_integer(*this) >>= shift;
 }
 
 big_integer big_integer::operator>>(
     std::pair<size_t, allocator *> const &other) const
 {
-    throw not_implemented("big_integer big_integer::operator>>(std::pair<size_t, allocator *> const &) const", "your code should be here...");
+    big_integer tmp("0", 10, other.second);
+    if (_other_digits)
+    {
+        tmp._other_digits = static_cast<uint *>(tmp.allocate_with_guard(sizeof(uint), get_size()));
+        std::memcpy(tmp._other_digits, _other_digits, sizeof(uint) * (get_size()));
+    }
+    return tmp >>= other.first;
 }
 
 big_integer &big_integer::multiply(

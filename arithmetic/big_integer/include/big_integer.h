@@ -394,7 +394,7 @@ public:
         std::istream &stream,
         big_integer &value);
 
-private:
+public:
 
     size_t default_base = 1 << (8 * sizeof(int) - 1);
 
@@ -420,9 +420,13 @@ private:
 
     void clear();
 
+    std::vector<int> convert_to_base(std::string const &value, size_t base);
+
 public:
 
     std::string big_integer_to_string(big_integer const & value) const;
+
+    std::string string_to_decimal(const std::string& number, int base);
 
 private:
 
