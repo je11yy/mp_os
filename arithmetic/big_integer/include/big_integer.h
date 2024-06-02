@@ -206,6 +206,11 @@ public:
         size_t base = 10,
         allocator *allocator = nullptr);
 
+    explicit big_integer(uint number);
+
+    explicit big_integer(
+        std::vector<unsigned int> const &digits);
+
 public:
 
     ~big_integer() noexcept;
@@ -431,7 +436,7 @@ public:
 private:
 
     int big_int_cmp(big_integer const & first, big_integer const & second) const;
-    
+    inline unsigned int get_digit_big_endian(int position) const noexcept;
 };
 
 #endif //MATH_PRACTICE_AND_OPERATING_SYSTEMS_BIGINT_H
