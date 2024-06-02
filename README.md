@@ -1,13 +1,14 @@
 <head>
 </head>
 <body>
+        <h2 align="center">Ставьте звездочку, если скатали отсюда. Посмотрим, сколько нас</h2>
     <h1 align="center">Completed tasks</h1>
     <h2 align="center">MP</h2>
     <div align="center">
             <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/logger/client_logger">Client logger</a></big><br>
             <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/associative_container/search_tree/binary_search_tree/include">BST</a></big><br>
             <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/associative_container/search_tree/binary_search_tree/AVL_tree">AVL</a></big><br>
-            <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/arithmetic/big_integer">Big Integer (Basic impementation only)</a></big><br>
+            <big><a href="https://github.com/je11yy/mp_os/tree/Vlasova/arithmetic/big_integer">Big Integer</a></big><br>
     </div>
     <h2 align="center">OS</h2>
     <div align="center">
