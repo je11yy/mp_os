@@ -1,6 +1,6 @@
 #include "../include/fraction.h"
 
-int fraction::sign()
+int fraction::sign() const noexcept
 {
     return _denominator.sign();
 }
@@ -229,52 +229,118 @@ std::istream &operator>>(
     return stream;
 }
 
+bool fraction::is_zero() const
+{
+    return _numerator.is_zero();
+}
+
+int fraction::is_valid_eps(fraction const &eps) const noexcept
+{
+    return !((eps.sign() == -1) || eps.is_zero());
+}
+
+fraction fraction::abs() const
+{
+    if (sign() > 0) return *this;
+    fraction tmp(*this);
+    tmp._denominator.change_sign();
+    return tmp;
+}
+
 fraction fraction::sin(
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::sin(fraction const &) const", "your code should be here...");
+    if (!is_valid_eps(epsilon)) throw std::logic_error("Invalid epsilon\n");
+
+    fraction term = *this;
+    fraction result(big_integer(0), big_integer(1));
+    int n = 1;
+    while (term.abs() >= epsilon) 
+    {
+        result += term;
+        fraction minus_term = term;
+        minus_term._denominator.change_sign();
+        term = (minus_term) * (*this) * (*this) / fraction(big_integer((2 * n ) * (2 * n + 1)), big_integer(1));
+        n++;
+    }
+
+    return result;
 }
 
 fraction fraction::cos(
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::cos(fraction const &) const", "your code should be here...");
+    if (!is_valid_eps(epsilon)) throw std::logic_error("invalid epsilon");
+
+    fraction term(big_integer(1), big_integer(1));
+    fraction result = term;
+    int n = 1;
+
+    while (term.abs() >= epsilon) 
+    {
+        fraction minus_term = term;
+        term = minus_term * (*this) * (*this) / fraction(big_integer((n) * (n + 1)), big_integer(1));
+        result += term;
+        n += 2;
+  }
+
+  return result;
 }
 
 fraction fraction::tg(
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::tg(fraction const &) const", "your code should be here...");
+	return sin(epsilon) / cos(epsilon);
 }
 
 fraction fraction::ctg(
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::ctg(fraction const &) const", "your code should be here...");
+    return cos(epsilon) / sin(epsilon);
 }
 
 fraction fraction::sec(
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::sec(fraction const &) const", "your code should be here...");
+    // 1 / cos(x)
+    return fraction(big_integer("1"), big_integer("1")) / cos(epsilon);
 }
 
 fraction fraction::cosec(
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::cosec(fraction const &) const", "your code should be here...");
+    // 1 / sin(x)
+    return fraction(big_integer("1"), big_integer("1")) / sin(epsilon);
 }
 
 fraction fraction::arcsin(
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::arcsin(fraction const &) const", "your code should be here...");
+    if (*this < fraction(big_integer("1"), big_integer("-1")) || *this > fraction(big_integer("1"), big_integer("1"))) 
+        throw std::logic_error("Invalid range\n");
+    
+    fraction result = *this;
+    fraction term = *this;
+    int n = 1;
+
+    while (term.abs() > epsilon) 
+    {
+        term = term * (*this) * (*this) * fraction(big_integer(std::to_string(n)), big_integer("1")) / fraction(big_integer(std::to_string(n + 1)), big_integer("1")) / fraction(big_integer(std::to_string(n + 2)), big_integer("1"));
+        result += term;
+        n += 2;
+    }
+
+    return result;
 }
 
 fraction fraction::arccos(
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::arccos(fraction const &) const", "your code should be here...");
+    if (*this < fraction(big_integer("1"), big_integer("-1")) || *this > fraction(big_integer("1"), big_integer("1"))) 
+        throw std::logic_error("Invalid range\n");
+
+    
+    
 }
 
 fraction fraction::arctg(
@@ -304,14 +370,59 @@ fraction fraction::arccosec(
 fraction fraction::pow(
     size_t degree) const
 {
-    throw not_implemented("fraction fraction::pow(size_t) const", "your code should be here...");
+    if (degree == 0) return fraction(big_integer("1"), big_integer("1")); 
+    if (degree < 0) return fraction(big_integer("1"), big_integer("1")) / pow(-degree);
+
+    fraction base(*this);
+    fraction result(big_integer(1), big_integer(1));
+
+    while (degree > 0) 
+    {
+        if (degree % 2 == 1) 
+        {
+            result *= base;
+            degree--;
+        }
+        base *= base;
+        degree /= 2; 
+    }
+
+    return result;
 }
 
 fraction fraction::root(
     size_t degree,
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::root(size_t, fraction const &) const", "your code should be here...");
+    fraction x = (*this);
+    bool swapped;
+    if (x._numerator > x._denominator)
+    {
+        std::swap(x._numerator, x._denominator);
+        swapped = true;
+    }
+    fraction alpha = fraction(big_integer("1"), big_integer(std::to_string(degree)));
+    x -= fraction(big_integer("1"), big_integer("1"));
+
+    fraction result = fraction(big_integer("1"), big_integer("1"));
+    fraction term = fraction(big_integer("2"), big_integer("1")) * epsilon;
+    size_t iteration = 1;
+    size_t factorial = 1;
+
+    while (term.abs() > epsilon)
+    {
+        fraction precalc = alpha;
+        for (int i = 1; i < iteration; ++i) precalc *= (alpha - fraction(big_integer(std::to_string(i)), big_integer("1")));
+
+        term = precalc;
+        term *= x.pow(iteration);
+        term *= fraction(big_integer("1"), big_integer(std::to_string(factorial)));
+        result += term;
+        ++iteration;
+        factorial *= iteration;
+    }
+    if (swapped) std::swap(result._denominator, result._numerator);
+    return result;
 }
 
 fraction fraction::log2(

@@ -9,8 +9,11 @@ class fraction final
 private:
 
     void fraction_reducing();
-    int sign();
+    int sign() const noexcept;
     big_integer find_denominator(const fraction& a, const fraction& sec);
+    int is_valid_eps(fraction const &eps) const noexcept;
+    bool is_zero() const;
+    fraction abs() const;
 
 public:
 
