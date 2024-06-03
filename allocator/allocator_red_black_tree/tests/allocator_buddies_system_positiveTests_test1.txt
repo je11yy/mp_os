@@ -1,0 +1,20 @@
+[INFORMATION] [RB allocator] Blocks state: <occup><40>, <avail><2410>, 
+
+[INFORMATION] [RB allocator] Blocks state: <occup><40>, <occup><226>, <avail><2159>, 
+
+[INFORMATION] [RB allocator] Blocks state: <occup><40>, <occup><226>, <occup><221>, <avail><1913>, 
+
+[INFORMATION] Available_memory: 1953
+
+[INFORMATION] [RB allocator]  Blocks state: <avail><40>, <occup><226>, <occup><221>, <avail><1913>, 
+
+[INFORMATION] Available_memory: 2204
+
+[INFORMATION] [RB allocator]  Blocks state: <avail><291>, <occup><221>, <avail><1913>, 
+
+[INFORMATION] [RB allocator] Blocks state: <avail><291>, <occup><221>, <occup><128>, <avail><1760>, 
+
+[INFORMATION] Available_memory: 2204
+
+[INFORMATION] [RB allocator]  Blocks state: <avail><291>, <occup><221>, <avail><1913>, 
+
