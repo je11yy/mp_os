@@ -417,9 +417,9 @@ public:
 
     inline int get_size() const noexcept;
 
-private:
-
     big_integer &change_sign();
+    
+private:
 
     std::vector<int> convert_string_to_vector(std::string value_as_string, size_t index);
 

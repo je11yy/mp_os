@@ -8,6 +8,12 @@ class fraction final
 
 private:
 
+    void fraction_reducing();
+    int sign();
+    big_integer find_denominator(const fraction& a, const fraction& sec);
+
+public:
+
     big_integer _numerator;
     big_integer _denominator;
 
@@ -19,7 +25,7 @@ public:
 
 public:
 
-    ~fraction() noexcept;
+    ~fraction() noexcept = default;
 
     fraction(
         fraction const &other);

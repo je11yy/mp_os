@@ -363,7 +363,7 @@ big_integer &big_integer::trivial_division::divide(
     }
 
     std::reverse(result_digits.begin(), result_digits.end());
-    while (result_digits.back() == 0) result_digits.pop_back();
+    while (result_digits.size() > 1 && result_digits.back() == 0) result_digits.pop_back();
 
     return dividend = big_integer(result_digits);
 }
@@ -1166,7 +1166,8 @@ big_integer &big_integer::operator<<=(
 
     if (result_digits.back() & (1 << ((sizeof(int) << 3) - 1))) result_digits.push_back(0);
 
-    return *this = big_integer(result_digits, _allocator);
+    *this = big_integer(result_digits, _allocator);
+    return *this;
 }
 
 big_integer big_integer::operator<<(
