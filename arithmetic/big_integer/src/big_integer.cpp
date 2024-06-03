@@ -279,7 +279,32 @@ big_integer &big_integer::Karatsuba_multiplication::multiply(
     big_integer &first_multiplier,
     big_integer const &second_multiplier) const
 {
-    throw not_implemented("big_integer &big_integer::Karatsuba_multiplication::multiply(big_integer &, big_integer const &)", "your code should be here...");
+    auto size = std::max(first_multiplier.get_size(), second_multiplier.get_size());
+    if (size < 10) return first_multiplier *= second_multiplier;
+
+    // делим числа пополам
+    size = size / 2 + size % 2;
+
+    big_integer multiplier = big_integer(string_pow(size, "10"));
+
+    big_integer first_value_first_half = first_multiplier / multiplier;
+    big_integer first_value_second_half = first_multiplier - (first_value_first_half * multiplier);
+
+    big_integer second_value_first_half = second_multiplier / multiplier;
+    big_integer size_bi(size);
+    big_integer second_value_second_half = second_multiplier - (second_value_first_half * size_bi);
+
+    big_integer prod1 = multiply(first_value_first_half, second_value_first_half);
+    big_integer prod2 = multiply(first_value_second_half, second_value_second_half);
+
+    big_integer first_sum = first_value_first_half + first_value_second_half;
+    big_integer second_sum = second_value_first_half + second_value_second_half;
+
+    big_integer prod3 = multiply(first_sum, second_sum);
+
+    big_integer pow_res = big_integer(string_pow(2 * size, "10"));
+
+    return first_multiplier = prod2 + (prod3 - prod2 - prod1) * multiplier + prod1 * pow_res;
 }
 
 big_integer &big_integer::Schonhage_Strassen_multiplication::multiply(
@@ -304,15 +329,15 @@ big_integer &big_integer::trivial_division::divide(
 {
     if (divisor.is_zero()) throw std::logic_error("Division by zero is not defined\n");
     if (dividend.is_zero()) return dividend;
+    if (divisor == big_integer("1")) return dividend;
 
     if (dividend.sign() < 0)
     {
         dividend.change_sign();
         if (divisor.sign() < 0) return dividend /= -divisor;
 
-        dividend /= divisor;
-        dividend.change_sign();
-        return dividend;
+        auto result = dividend / divisor;
+        return dividend = -result;
     }
     else if (divisor.sign() < 0)
     {
@@ -324,21 +349,21 @@ big_integer &big_integer::trivial_division::divide(
     if (dividend < divisor) return dividend = big_integer("0", 10, dividend._allocator);
     if (dividend == divisor) return dividend = big_integer("1", 10, dividend._allocator);
 
-
     unsigned int constexpr shift = sizeof(uint) << 3;
 
     auto const first_size = dividend.get_size();
     auto const second_size = divisor.get_size();
 
     std::vector<int> result_digits(1, 0);
-    big_integer remainder("0");
+    big_integer remainder(std::vector<int> { 0 });
 
-    for (int i = first_size - 1; i >= 0; --i)
+    for (auto i = first_size - 1; i >= 0; --i)
     {
         auto first_value_digit = dividend.get_digit(i);
         remainder <<= shift;
-        if ((1 << (shift - 1)) & first_value_digit) remainder += big_integer(std::vector<int> { *reinterpret_cast<int *>(&first_value_digit), 0 });
-        else remainder += big_integer(std::vector<int> { *reinterpret_cast<int *>(&first_value_digit) });
+        remainder += (1 << ((sizeof(int) << 3) - 1)) & first_value_digit
+            ? big_integer(std::vector<int> { *reinterpret_cast<int *>(&first_value_digit), 0 })
+            : big_integer(std::vector<int> { *reinterpret_cast<int *>(&first_value_digit) });
 
         if (remainder >= divisor)
         {
@@ -375,25 +400,24 @@ big_integer &big_integer::trivial_division::modulo(
 {
     if (divisor.is_zero()) throw std::logic_error("Division by zero is not defined\n");
     if (dividend.is_zero()) return dividend;
+    if (divisor == big_integer("1")) return dividend = big_integer("0");
 
     if (dividend.sign() < 0)
     {
         dividend.change_sign();
-        if (divisor.sign() < 0) return dividend /= -divisor;
+        if (divisor.sign() < 0) return dividend %= -divisor;
 
-        dividend /= divisor;
-        dividend.change_sign();
-        return dividend;
+        auto result = dividend % divisor;
+        return dividend = -result;
     }
     else if (divisor.sign() < 0)
     {
-        dividend /= -divisor;
-        dividend.change_sign();
+        dividend %= -divisor;
         return dividend;
     }
 
-    if (dividend < divisor) return dividend = big_integer("0", 10, dividend._allocator);
-    if (dividend == divisor) return dividend = big_integer("1", 10, dividend._allocator);
+    if (dividend < divisor) return dividend;
+    if (dividend == divisor) return dividend = big_integer("0", 10, dividend._allocator);
 
 
     unsigned int constexpr shift = sizeof(uint) << 3;
@@ -551,14 +575,7 @@ void big_integer::copy_from(
     _other_digits = nullptr;
     if (!other._other_digits) return;
 
-    try
-    {
-        _other_digits = static_cast<uint *>(allocate_with_guard(sizeof(uint), other.get_size()));
-    }
-    catch(const std::bad_alloc& e)
-    {
-        throw e;
-    }
+    _other_digits = static_cast<uint *>(allocate_with_guard(sizeof(uint), other.get_size()));
     
     std::memcpy(_other_digits, other._other_digits, sizeof(uint) * (*other._other_digits));
 }
@@ -574,14 +591,7 @@ void big_integer::initialize_from(
     _oldest_digit = digits[digits_count - 1];
     if (digits_count == 1) return;
     
-    try
-    {
-        _other_digits = static_cast<uint *>(allocate_with_guard(sizeof(uint), digits_count));
-    }
-    catch(const std::bad_alloc& e)
-    {
-        throw e;
-    }
+    _other_digits = static_cast<uint *>(allocate_with_guard(sizeof(uint), digits_count));
     
     *_other_digits = (size_t)digits_count;
     std::memcpy(_other_digits + 1, digits, sizeof(uint) * (digits_count - 1));
@@ -591,23 +601,20 @@ void big_integer::initialize_from(
     std::vector<int> const &digits,
     size_t digits_count)
 {
-    if (digits.empty() || !digits_count) throw std::logic_error("std::vector<int> of digits should not be empty\n");
+    if (digits.empty() || digits_count == 0) throw std::logic_error("std::vector<int> of digits should not be empty\n");
 
     _oldest_digit = digits[digits_count - 1];
-    if (digits_count == 1) return;
+    if (digits_count == 1)
+    {
+        _other_digits = nullptr;
+        return;
+    }
     
-    try
-    {
-        _other_digits = static_cast<uint *>(allocate_with_guard(sizeof(uint), digits_count));
-    }
-    catch(const std::bad_alloc& e)
-    {
-        throw e;
-    }
+    _other_digits = static_cast<uint *>(allocate_with_guard(sizeof(uint), digits_count));
 
     *_other_digits = digits_count;
 
-    for (auto i = 1; i < digits_count; ++i) _other_digits[i] = *reinterpret_cast<uint const *>(&digits[i - 1]);
+    for (auto i = 0; i < digits_count - 1; ++i) _other_digits[i + 1] = *reinterpret_cast<uint const *>(&digits[i]);
 }
 
 void big_integer::initialize_from(
@@ -800,7 +807,7 @@ big_integer &big_integer::operator+=(
         return change_sign();
     }
 
-    if (other.sign()  < 0) return *this -= -other;
+    if (other.sign() < 0) return *this -= -other;
 
     auto const first_size = get_size();
     auto const second_size = other.get_size();
@@ -829,14 +836,17 @@ big_integer &big_integer::operator+=(
         }
     }
 
-    auto result_size = result.size();
+    result.back() += *reinterpret_cast<int *>(&operation_result);
 
-    if (operation_result == 1)
+    auto maybe_overflowed_digit_ptr = reinterpret_cast<unsigned int *>(&*(result.end() - 2));
+    if (*maybe_overflowed_digit_ptr >> ((sizeof(unsigned int) << 3) - 1))
     {
-        if ((*reinterpret_cast<uint *>(&result[size - 1]) >> ((sizeof(uint) << 3) - 1)) == 0) *reinterpret_cast<uint *>(&result[size - 1]) |= (1u << ((sizeof(uint) << 3) - 1));
-        else result.back() = 1;
+        *maybe_overflowed_digit_ptr ^= (1 << ((sizeof(unsigned int) << 3) - 1));
+        ++result.back();
     }
-    else if ((*reinterpret_cast<uint *>(&result[size - 1]) >> ((sizeof(uint) << 3) - 1)) == 0) --result_size;
+    
+    auto result_size = result.size();
+    if (result.back() == 0) --result_size;
 
     clear();
     initialize_from(result, result_size);
@@ -867,11 +877,11 @@ big_integer &big_integer::operator-=(
     if (other.is_zero()) return *this;
     if (is_zero()) return *this = -other;
     
-    if (sign() == 1 && other.sign() == -1) return *this += -other;
+    if (sign() > 0 && other.sign() < 0) return *this += -other;
 
-    if (sign() == -1)
+    if (sign() < 0)
     {
-        if (other.sign() == 1) return (-*this + other).change_sign();
+        if (other.sign() > 0) return (-*this + other).change_sign();
         return *this = (-other) - (-*this);
     }
 
@@ -1139,7 +1149,7 @@ big_integer &big_integer::operator<<=(
 {
     if (is_zero() || !shift) return *this;
 
-    if (sign() == -1)
+    if (sign() < 0)
     {
         change_sign();
         *this <<= shift;
@@ -1165,8 +1175,8 @@ big_integer &big_integer::operator<<=(
     if (carry) result_digits.push_back(static_cast<int>(carry));
 
     if (result_digits.back() & (1 << ((sizeof(int) << 3) - 1))) result_digits.push_back(0);
-
-    *this = big_integer(result_digits, _allocator);
+    
+    *this = big_integer(result_digits);
     return *this;
 }
 
@@ -1212,14 +1222,7 @@ big_integer &big_integer::operator>>=(
 
         auto new_size = *_other_digits - to_remove;
         uint * new_digits;
-        try
-        {
-            new_digits = static_cast<uint *>(allocate_with_guard(sizeof(uint), new_size + 1));
-        }
-        catch(const std::bad_alloc& e)
-        {
-            throw e;
-        }
+        new_digits = static_cast<uint *>(allocate_with_guard(sizeof(uint), new_size + 1));
         
         std::memcpy(new_digits + 1, _other_digits + 1 + to_remove, sizeof(uint) * (new_size - 1));
         *new_digits = new_size;
@@ -1275,16 +1278,15 @@ big_integer &big_integer::multiply(
     switch (multiplication_rule)
     {
         case multiplication_rule::trivial:
-            try
-            {
-                if (allocator) _mult = static_cast<big_integer::trivial_multiplication *>(allocator->allocate(sizeof(big_integer::trivial_multiplication), 1));
-                else _mult = new big_integer::trivial_multiplication;
-            }
-            catch(const std::bad_alloc& e)
-            {
-                throw e;
-            }
+            if (allocator) _mult = static_cast<big_integer::trivial_multiplication *>(allocator->allocate(sizeof(big_integer::trivial_multiplication), 1));
+            else _mult = new big_integer::trivial_multiplication;
             first_multiplier = _mult->multiply(first_multiplier, second_multiplier);
+            break;
+        case multiplication_rule::Karatsuba:
+            if (allocator) _mult = static_cast<big_integer::Karatsuba_multiplication *>(allocator->allocate(sizeof(big_integer::Karatsuba_multiplication), 1));
+            else _mult = new big_integer::Karatsuba_multiplication;
+            first_multiplier = _mult->multiply(first_multiplier, second_multiplier);
+            break;
     }
     if (allocator) allocator->deallocate(_mult);
     else delete _mult;
@@ -1302,17 +1304,17 @@ big_integer big_integer::multiply(
     switch (multiplication_rule)
     {
         case multiplication_rule::trivial:
-            try
-            {
-                if (allocator) _mult = static_cast<big_integer::trivial_multiplication *>(allocator->allocate(sizeof(big_integer::trivial_multiplication), 1));
-                else _mult = new big_integer::trivial_multiplication;
-            }
-            catch(const std::bad_alloc& e)
-            {
-                throw e;
-            }
+            if (allocator) _mult = static_cast<big_integer::trivial_multiplication *>(allocator->allocate(sizeof(big_integer::trivial_multiplication), 1));
+            else _mult = new big_integer::trivial_multiplication;
             *tmp = first_multiplier;
             *tmp = _mult->multiply(*tmp, second_multiplier);
+            break;
+        case multiplication_rule::Karatsuba:
+            if (allocator) _mult = static_cast<big_integer::Karatsuba_multiplication *>(allocator->allocate(sizeof(big_integer::Karatsuba_multiplication), 1));
+            else _mult = new big_integer::Karatsuba_multiplication;
+            *tmp = first_multiplier;
+            *tmp = _mult->multiply(*tmp, second_multiplier);
+            break;
     }
     if (allocator) allocator->deallocate(_mult);
     else delete _mult;
@@ -1330,15 +1332,8 @@ big_integer &big_integer::divide(
     switch (division_rule)
     {
         case division_rule::trivial:
-            try
-            {
-                if (allocator) _div = static_cast<big_integer::trivial_division *>(allocator->allocate(sizeof(big_integer::trivial_division), 1));
-                else _div = new big_integer::trivial_division;
-            }
-            catch(const std::bad_alloc& e)
-            {
-                throw e;
-            }
+            if (allocator) _div = static_cast<big_integer::trivial_division *>(allocator->allocate(sizeof(big_integer::trivial_division), 1));
+            else _div = new big_integer::trivial_division;
             dividend =_div->divide(dividend, divisor, multiplication_rule);
             break;
     }
@@ -1359,15 +1354,8 @@ big_integer big_integer::divide(
     switch (division_rule)
     {
         case division_rule::trivial:
-            try
-            {
-                if (allocator) _div = static_cast<big_integer::trivial_division *>(allocator->allocate(sizeof(big_integer::trivial_division), 1));
-                else _div = new big_integer::trivial_division;
-            }
-            catch(const std::bad_alloc& e)
-            {
-                throw e;
-            }
+            if (allocator) _div = static_cast<big_integer::trivial_division *>(allocator->allocate(sizeof(big_integer::trivial_division), 1));
+            else _div = new big_integer::trivial_division;
             *tmp = dividend;
             *tmp = _div->divide(*tmp, divisor, multiplication_rule);
             break;
@@ -1388,15 +1376,8 @@ big_integer &big_integer::modulo(
     switch (division_rule)
     {
         case division_rule::trivial:
-            try
-            {
-                if (allocator) _div = static_cast<big_integer::trivial_division *>(allocator->allocate(sizeof(big_integer::trivial_division), 1));
-                else _div = new big_integer::trivial_division;
-            }
-            catch(const std::bad_alloc& e)
-            {
-                throw e;
-            }
+            if (allocator) _div = static_cast<big_integer::trivial_division *>(allocator->allocate(sizeof(big_integer::trivial_division), 1));
+            else _div = new big_integer::trivial_division;
             return _div->modulo(dividend, divisor, multiplication_rule);
     }
 }
@@ -1412,15 +1393,8 @@ big_integer big_integer::modulo(
     switch (division_rule)
     {
         case division_rule::trivial:
-            try
-            {
-                if (allocator) _div = static_cast<big_integer::trivial_division *>(allocator->allocate(sizeof(big_integer::trivial_division), 1));
-                else _div = new big_integer::trivial_division;
-            }
-            catch(const std::bad_alloc& e)
-            {
-                throw e;
-            }
+            if (allocator) _div = static_cast<big_integer::trivial_division *>(allocator->allocate(sizeof(big_integer::trivial_division), 1));
+            else _div = new big_integer::trivial_division;
             big_integer tmp(dividend);
             return _div->modulo(tmp, divisor, multiplication_rule);
     }

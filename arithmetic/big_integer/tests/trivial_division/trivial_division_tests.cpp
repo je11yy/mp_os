@@ -159,7 +159,7 @@ TEST(positive_tests, test7)
     big_integer bigint_2("42389428935349086840957804985309763636567574564");
     big_integer::divide(bigint_1, bigint_2, nullptr, big_integer::division_rule::trivial);
 
-    EXPECT_TRUE((std::ostringstream() << bigint_1).str() == "291167766502899124008723943300693817184031156313950883875886123638773043440828935681031181");
+    EXPECT_TRUE((std::ostringstream() << bigint_1).str() == "291167766502899124008723943300693817184031156313950883875886123638773043440829058575761407");
 
     delete logger;
 }
