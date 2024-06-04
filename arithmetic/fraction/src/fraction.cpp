@@ -5,18 +5,15 @@ int fraction::sign() const noexcept
     return _denominator.sign();
 }
 
-big_integer fraction::find_denominator(const fraction& a, const fraction& sec)
+big_integer fraction::nod(big_integer a, big_integer b) const
 {
-    big_integer gcd = a._denominator;
-    big_integer b = sec._denominator;
-    if (gcd < b) std::swap(gcd, b);
-    while (b != big_integer("1") && !b.is_zero())
+    if (a < b) std::swap(a, b);
+    while (b != big_integer("0"))
     {
-        big_integer temp = b;
-        b = gcd % b;
-        gcd = temp;
+        a %= b;
+		std::swap(a, b);
     }
-    return (a._denominator * sec._denominator) / (gcd);
+    return a;
 }
 
 /*
@@ -26,6 +23,7 @@ void fraction::fraction_reducing()
 {
     if (_denominator == big_integer("1")) return;
     bool is_negative = false;
+
     if (_denominator.sign() < 0)
     {
         _denominator.change_sign();
@@ -33,8 +31,9 @@ void fraction::fraction_reducing()
     }
 
     big_integer gcd = _denominator, b = _numerator;
+
     if (gcd < b) std::swap(gcd, b);
-    while (!b.is_zero())
+    while (b != big_integer("0"))
     {
         big_integer temp = b;
         b = gcd % b;
@@ -88,18 +87,51 @@ fraction &fraction::operator=(
     return *this;
 }
 
+void fraction::make_same_denominator(fraction &a, fraction &b) const
+{
+    big_integer nok = (a._denominator * b._denominator) / nod(a._denominator, b._denominator);
+
+    big_integer mult1 = nok / a._denominator;
+    big_integer mult2 = nok / b._denominator;
+
+    a._numerator *= mult1;
+    a._denominator *= mult1;
+
+    b._numerator *= mult2;
+    b._denominator *= mult2;
+}
+
 fraction &fraction::operator+=(
     fraction const &other)
 {
-    big_integer deletil = find_denominator(*this, other);
+    fraction c_other(other);
 
-    big_integer first_multiplyer = deletil / _denominator;
-    big_integer second_multiplyer = deletil / other._denominator;
+    if (sign() < 0 && other.sign() < 0) 
+    {
+        _denominator.change_sign();
+        c_other._denominator.change_sign();
+        *this += c_other;
+        _denominator.change_sign();
+        return *this;
+    }
 
-    _denominator = deletil;
+    if (sign() < 0 && other.sign() > 0) 
+    {     
+        _denominator.change_sign();
+        fraction res = other - *this; 
+        return (*this = res);
+    } 
 
-    _numerator *= first_multiplyer;
-    _numerator += (other._numerator * second_multiplyer);
+    if (other.sign() < 0 && sign() > 0) 
+    {
+        c_other._denominator.change_sign(); 
+        fraction res = *this - c_other;
+        return (*this = res);
+    }
+
+    make_same_denominator(*this, c_other);
+
+    _numerator += c_other._numerator;
 
     fraction_reducing();
     return *this;
@@ -114,13 +146,39 @@ fraction fraction::operator+(
 fraction &fraction::operator-=(
     fraction const &other)
 {
-    big_integer deletil = find_denominator(*this, other);
-    big_integer first_multiplyer = deletil / _denominator;
-    big_integer second_multiplyer = deletil / other._denominator;
+    fraction c_other(other);
 
-    _denominator = deletil;
-    _numerator *= first_multiplyer;
-    _numerator -= (other._numerator * second_multiplyer);
+    if (sign() < 0 && c_other.sign() < 0) 
+    {
+        c_other._denominator.change_sign();
+        *this = c_other - *this; 
+        return *this;
+    } 
+
+    if (sign() > 0 && c_other.sign() < 0) 
+    {
+        c_other._denominator.change_sign();
+        *this += c_other;
+        return *this;
+    }
+
+    if (sign() < 0 && c_other.sign() > 0) 
+    {
+        _denominator.change_sign();
+        *this += c_other;
+        _denominator.change_sign();
+        return *this;
+    }
+
+    make_same_denominator(*this, c_other);
+
+    _numerator -= c_other._numerator;
+
+    if (_numerator.sign() == -1) 
+    {
+        _numerator *= big_integer(-1);
+        _denominator *= big_integer(-1);
+    }
 
     fraction_reducing();
     return *this;
@@ -172,31 +230,48 @@ bool fraction::operator==(
 bool fraction::operator!=(
     fraction const &other) const
 {
-    return (_numerator != other._numerator && _denominator != other._denominator);
+    return !(*this == other);
 }
 
 bool fraction::operator>=(
     fraction const &other) const
 {
-    return (_numerator * other._denominator > other._numerator * _denominator) || (_numerator == other._numerator && _denominator == other._denominator);
+    return !(*this < other);
 }
 
 bool fraction::operator>(
     fraction const &other) const
 {
-    return _numerator * other._denominator > other._numerator * _denominator;
+    if (sign() < 0 && other.sign() < 0) return (*this < other);
+
+    if (sign() != other.sign()) return (sign() > 0);
+
+    fraction c_this = *this;
+    fraction c_other = other;
+
+    make_same_denominator(c_this, c_other);
+
+    return (c_this._numerator > c_other._numerator);
 }
 
 bool fraction::operator<=(
     fraction const &other) const
 {
-    return (_numerator * other._denominator < other._numerator * _denominator) || (_numerator == other._numerator && _denominator == other._denominator);
+    return !(*this > other);
 }
 
 bool fraction::operator<(
     fraction const &other) const
 {
-    return _numerator * other._denominator < other._numerator * _denominator;
+    if (sign() < 0 && other.sign() < 0) return (abs() > other.abs());
+    if (sign() != other.sign()) return (sign() < 0);
+
+    fraction c_this = *this;
+    fraction c_other = other;
+
+    make_same_denominator(c_this, c_other);
+
+    return (c_this._numerator < c_other._numerator);
 }
 
 std::ostream &operator<<(
@@ -253,14 +328,14 @@ fraction fraction::sin(
     if (!is_valid_eps(epsilon)) throw std::logic_error("Invalid epsilon\n");
 
     fraction term = *this;
-    fraction result(big_integer(0), big_integer(1));
+    fraction result(big_integer("0"), big_integer("1"));
     int n = 1;
     while (term.abs() >= epsilon) 
     {
         result += term;
         fraction minus_term = term;
         minus_term._denominator.change_sign();
-        term = (minus_term) * (*this) * (*this) / fraction(big_integer((2 * n ) * (2 * n + 1)), big_integer(1));
+        term = (minus_term) * (*this) * (*this) / fraction(big_integer(std::to_string((2 * n ) * (2 * n + 1))), big_integer("1"));
         n++;
     }
 
@@ -272,17 +347,18 @@ fraction fraction::cos(
 {
     if (!is_valid_eps(epsilon)) throw std::logic_error("invalid epsilon");
 
-    fraction term(big_integer(1), big_integer(1));
+    fraction term(big_integer("1"), big_integer("1"));
     fraction result = term;
     int n = 1;
 
     while (term.abs() >= epsilon) 
     {
         fraction minus_term = term;
-        term = minus_term * (*this) * (*this) / fraction(big_integer((n) * (n + 1)), big_integer(1));
+        term._denominator.change_sign();
+        term = minus_term * (*this) * (*this) / fraction(big_integer(std::to_string((n) * (n + 1))), big_integer("1"));
         result += term;
         n += 2;
-  }
+    }
 
   return result;
 }
@@ -325,6 +401,7 @@ fraction fraction::arcsin(
 
     while (term.abs() > epsilon) 
     {
+        term *= fraction(big_integer(std::to_string(n)), big_integer("1"));
         term = term * (*this) * (*this) * fraction(big_integer(std::to_string(n)), big_integer("1")) / fraction(big_integer(std::to_string(n + 1)), big_integer("1")) / fraction(big_integer(std::to_string(n + 2)), big_integer("1"));
         result += term;
         n += 2;
@@ -338,33 +415,41 @@ fraction fraction::arccos(
 {
     if (*this < fraction(big_integer("1"), big_integer("-1")) || *this > fraction(big_integer("1"), big_integer("1"))) 
         throw std::logic_error("Invalid range\n");
-
     
-    
+    fraction tmp = fraction(big_integer("1"), big_integer("1")).arcsin(epsilon);
+    fraction result = tmp - arcsin(epsilon);
+    return result;
 }
 
 fraction fraction::arctg(
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::arctg(fraction const &) const", "your code should be here...");
+    if (*this < fraction(big_integer("1"), big_integer("-1")) || *this > fraction(big_integer("1"), big_integer("1"))) 
+        throw std::logic_error("Invalid range\n");
+
+    fraction tmp = ((*this) / (pow(2) + fraction(big_integer("1"), big_integer("1"))).root(2, epsilon)).arcsin(epsilon);
 }
 
 fraction fraction::arcctg(
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::arcctg(fraction const &) const", "your code should be here...");
+    if (*this < fraction(big_integer("1"), big_integer("-1")) || *this > fraction(big_integer("1"), big_integer("1"))) 
+        throw std::logic_error("Invalid range\n");
+
+    fraction tmp = (*this) * (fraction(big_integer("1"), big_integer("1")) / ((*this) * (*this) + fraction(big_integer("1"), big_integer("1"))).root(2, epsilon));
+    return tmp.arccos(epsilon);
 }
 
 fraction fraction::arcsec(
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::arcsec(fraction const &) const", "your code should be here...");
+    return (fraction(big_integer("1"), big_integer("1")) / (*this)).arccos(epsilon);
 }
 
 fraction fraction::arccosec(
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::arccosec(fraction const &) const", "your code should be here...");
+    return (fraction(big_integer("1"), big_integer("1")) / (*this)).arcsin(epsilon);
 }
 
 fraction fraction::pow(
@@ -394,51 +479,54 @@ fraction fraction::root(
     size_t degree,
     fraction const &epsilon) const
 {
-    fraction x = (*this);
-    bool swapped;
-    if (x._numerator > x._denominator)
+    fraction left(big_integer("0"), big_integer("1"));
+    fraction right = *this;
+    fraction mid(big_integer("1"), big_integer("1"));
+
+    while (right - left > epsilon) 
     {
-        std::swap(x._numerator, x._denominator);
-        swapped = true;
+        mid = (left + right) / fraction(big_integer("2"), big_integer("1"));
+        fraction pow_mid = mid.pow(degree);
+
+        if (pow_mid < *this) left = mid;
+        else right = mid;
     }
-    fraction alpha = fraction(big_integer("1"), big_integer(std::to_string(degree)));
-    x -= fraction(big_integer("1"), big_integer("1"));
 
-    fraction result = fraction(big_integer("1"), big_integer("1"));
-    fraction term = fraction(big_integer("2"), big_integer("1")) * epsilon;
-    size_t iteration = 1;
-    size_t factorial = 1;
-
-    while (term.abs() > epsilon)
-    {
-        fraction precalc = alpha;
-        for (int i = 1; i < iteration; ++i) precalc *= (alpha - fraction(big_integer(std::to_string(i)), big_integer("1")));
-
-        term = precalc;
-        term *= x.pow(iteration);
-        term *= fraction(big_integer("1"), big_integer(std::to_string(factorial)));
-        result += term;
-        ++iteration;
-        factorial *= iteration;
-    }
-    if (swapped) std::swap(result._denominator, result._numerator);
-    return result;
+    return (left + right) / fraction(big_integer("2"), big_integer("1"));
 }
 
 fraction fraction::log2(
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::log2(fraction const &) const", "your code should be here...");
+    return (ln(epsilon) / fraction(big_integer("2"), big_integer("1")).ln(epsilon));
 }
 
 fraction fraction::ln(
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::ln(fraction const &) const", "your code should be here...");
+    if (*this <= fraction(big_integer("0"), big_integer("1")))
+        throw std::logic_error("Cannot compute ln of negative value\n");
+    
+    fraction log_value(big_integer("0"), big_integer("1"));
+    fraction x = (*this - fraction(big_integer("1"), big_integer("1"))) / (*this + fraction(big_integer("1"), big_integer("1")));
+    int n = 1;
+
+    fraction term(x);
+    fraction x_pow = x;
+
+    while (term.abs() > epsilon)
+    {
+        term = x_pow / fraction(big_integer(std::to_string(2 * n - 1)), big_integer("1"));
+        log_value += term;
+        x_pow *= x.pow(2);
+        n++;
+    }
+
+    return log_value * fraction(big_integer("2"), big_integer("1"));
 }
 
 fraction fraction::lg(
     fraction const &epsilon) const
 {
-    throw not_implemented("fraction fraction::lg(fraction const &) const", "your code should be here...");
+    return (ln(epsilon) / fraction(big_integer("10"), big_integer("1")).ln(epsilon));
 }

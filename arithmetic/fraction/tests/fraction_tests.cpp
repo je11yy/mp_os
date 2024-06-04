@@ -34,7 +34,7 @@ TEST(positive_tests, test1)
     logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
         {
             {
-                "bigint_logs.txt",
+                "fraction_tests_log.txt",
                 logger::severity::information
             },
         });
@@ -57,7 +57,7 @@ TEST(positive_tests, test2)
     logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
         {
             {
-                "bigint_logs.txt",
+                "fraction_tests_log.txt",
                 logger::severity::information
             },
         });
@@ -87,7 +87,7 @@ TEST(positive_tests, test3)
     logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
         {
             {
-                "bigint_logs.txt",
+                "fraction_tests_log.txt",
                 logger::severity::information
             },
         });
@@ -117,7 +117,7 @@ TEST(positive_tests, test4)
     logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
         {
             {
-                "bigint_logs.txt",
+                "fraction_tests_log.txt",
                 logger::severity::information
             },
         });
@@ -147,7 +147,7 @@ TEST(positive_tests, test5)
     logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
         {
             {
-                "bigint_logs.txt",
+                "fraction_tests_log.txt",
                 logger::severity::information
             },
         });
@@ -177,7 +177,7 @@ TEST(positive_tests, test6)
     logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
         {
             {
-                "bigint_logs.txt",
+                "fraction_tests_log.txt",
                 logger::severity::information
             },
         });
@@ -201,7 +201,7 @@ TEST(positive_tests, test7)
     logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
         {
             {
-                "bigint_logs.txt",
+                "fraction_tests_log.txt",
                 logger::severity::information
             },
         });
@@ -225,7 +225,7 @@ TEST(positive_tests, test8)
     logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
         {
             {
-                "bigint_logs.txt",
+                "fraction_tests_log.txt",
                 logger::severity::information
             },
         });
@@ -249,7 +249,7 @@ TEST(positive_tests, test9)
     logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
         {
             {
-                "bigint_logs.txt",
+                "fraction_tests_log.txt",
                 logger::severity::information
             },
         });
@@ -267,6 +267,307 @@ TEST(positive_tests, test9)
     
     delete logger;
 }
+
+TEST(positive_tests, test10)
+{
+    logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
+        {
+            {
+                "fraction_tests_log.txt",
+                logger::severity::information
+            },
+        });
+    
+    big_integer bigint_1("1");
+    big_integer bigint_2("3");
+    
+    fraction frct_1(std::move(bigint_1), std::move(bigint_2));
+
+    big_integer bigint_3("1");
+    big_integer bigint_4("1000");
+    fraction epsilon(std::move(bigint_3), std::move(bigint_4));
+
+    std::cout << frct_1.sin(epsilon) << std::endl;
+    
+    delete logger;
+}
+
+TEST(positive_tests, test11)
+{
+    logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
+        {
+            {
+                "fraction_tests_log.txt",
+                logger::severity::information
+            },
+        });
+    
+    big_integer bigint_1("1");
+    big_integer bigint_2("3");
+    
+    fraction frct_1(std::move(bigint_1), std::move(bigint_2));
+
+    big_integer bigint_3("1");
+    big_integer bigint_4("1000");
+    
+    fraction epsilon(std::move(bigint_3), std::move(bigint_4));
+
+    std::cout << frct_1.cos(epsilon) << std::endl;
+    
+    delete logger;
+}
+
+TEST(positive_tests, test12)
+{
+    logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
+        {
+            {
+                "fraction_tests_log.txt",
+                logger::severity::information
+            },
+        });
+    
+    big_integer bigint_1("1");
+    big_integer bigint_2("3");
+    
+    fraction frct_1(std::move(bigint_1), std::move(bigint_2));
+
+    big_integer bigint_3("1");
+    big_integer bigint_4("1000");
+    
+    fraction epsilon(std::move(bigint_3), std::move(bigint_4));
+
+    std::cout << frct_1.tg(epsilon) << std::endl;
+    
+    delete logger;
+}
+
+
+TEST(positive_tests, test13)
+{
+    logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
+        {
+            {
+                "fraction_tests_log.txt",
+                logger::severity::information
+            },
+        });
+    
+    big_integer bigint_1("1");
+    big_integer bigint_2("3");
+    
+    fraction frct_1(std::move(bigint_1), std::move(bigint_2));
+
+    big_integer bigint_3("1");
+    big_integer bigint_4("1000");
+    
+    fraction epsilon(std::move(bigint_3), std::move(bigint_4));
+
+    std::cout << frct_1.ctg(epsilon) << std::endl;
+    
+    delete logger;
+}
+
+TEST(positive_tests, test14)
+{
+    logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
+        {
+            {
+                "fraction_tests_log.txt",
+                logger::severity::information
+            },
+        });
+    
+    big_integer bigint_1("1");
+    big_integer bigint_2("3");
+    
+    fraction frct_1(std::move(bigint_1), std::move(bigint_2));
+
+    big_integer bigint_3("1");
+    big_integer bigint_4("1000");
+    
+    fraction epsilon(std::move(bigint_3), std::move(bigint_4));
+
+    std::cout << frct_1.sec(epsilon) << std::endl;
+    
+    delete logger;
+}
+
+TEST(positive_tests, test15)
+{
+    logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
+        {
+            {
+                "fraction_tests_log.txt",
+                logger::severity::information
+            },
+        });
+    
+    big_integer bigint_1("1");
+    big_integer bigint_2("3");
+    
+    fraction frct_1(std::move(bigint_1), std::move(bigint_2));
+
+    big_integer bigint_3("1");
+    big_integer bigint_4("1000");
+    
+    fraction epsilon(std::move(bigint_3), std::move(bigint_4));
+
+    std::cout << frct_1.cosec(epsilon) << std::endl;
+    
+    delete logger;
+}
+
+TEST(positive_tests, test16)
+{
+    logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
+        {
+            {
+                "fraction_tests_log.txt",
+                logger::severity::information
+            },
+        });
+    
+    big_integer bigint_1("1");
+    big_integer bigint_2("3");
+    
+    fraction frct_1(std::move(bigint_1), std::move(bigint_2));
+
+    big_integer bigint_3("1");
+    big_integer bigint_4("1000");
+    
+    fraction epsilon(std::move(bigint_3), std::move(bigint_4));
+
+    std::cout << frct_1.arcsin(epsilon) << std::endl;
+    
+    delete logger;
+}
+
+TEST(positive_tests, test17)
+{
+    logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
+        {
+            {
+                "fraction_tests_log.txt",
+                logger::severity::information
+            },
+        });
+    
+    big_integer bigint_1("1");
+    big_integer bigint_2("3");
+    
+    fraction frct_1(std::move(bigint_1), std::move(bigint_2));
+
+    big_integer bigint_3("1");
+    big_integer bigint_4("10");
+    
+    fraction epsilon(std::move(bigint_3), std::move(bigint_4));
+
+    std::cout << frct_1.arccos(epsilon) << std::endl;
+    
+    delete logger;
+}
+
+TEST(positive_tests, test19)
+{
+    logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
+        {
+            {
+                "fraction_tests_log.txt",
+                logger::severity::information
+            },
+        });
+    
+    big_integer bigint_1("1");
+    big_integer bigint_2("3");
+    
+    fraction frct_1(std::move(bigint_1), std::move(bigint_2));
+
+    big_integer bigint_3("1");
+    big_integer bigint_4("10");
+    
+    fraction epsilon(std::move(bigint_3), std::move(bigint_4));
+
+    std::cout << frct_1.arcctg(epsilon) << std::endl;
+    
+    delete logger;
+}
+
+TEST(positive_tests, test22)
+{
+    logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
+        {
+            {
+                "fraction_tests_log.txt",
+                logger::severity::information
+            },
+        });
+    
+    big_integer bigint_1("1");
+    big_integer bigint_2("3");
+    
+    fraction frct_1(std::move(bigint_1), std::move(bigint_2));
+
+    big_integer bigint_3("1");
+    big_integer bigint_4("1000");
+    
+    fraction epsilon(std::move(bigint_3), std::move(bigint_4));
+
+    std::cout << frct_1.log2(epsilon) << std::endl;
+    
+    delete logger;
+}
+
+TEST(positive_tests, test23)
+{
+    logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
+        {
+            {
+                "fraction_tests_log.txt",
+                logger::severity::information
+            },
+        });
+    
+    big_integer bigint_1("1");
+    big_integer bigint_2("3");
+    
+    fraction frct_1(std::move(bigint_1), std::move(bigint_2));
+
+    big_integer bigint_3("1");
+    big_integer bigint_4("1000");
+    
+    fraction epsilon(std::move(bigint_3), std::move(bigint_4));
+
+    std::cout << frct_1.ln(epsilon) << std::endl;
+    
+    delete logger;
+}
+
+TEST(positive_tests, test24)
+{
+    logger *logger = create_logger(std::vector<std::pair<std::string, logger::severity>>
+        {
+            {
+                "fraction_tests_log.txt",
+                logger::severity::information
+            },
+        });
+    
+    big_integer bigint_1("1");
+    big_integer bigint_2("3");
+    
+    fraction frct_1(std::move(bigint_1), std::move(bigint_2));
+
+    big_integer bigint_3("1");
+    big_integer bigint_4("1000");
+    
+    fraction epsilon(std::move(bigint_3), std::move(bigint_4));
+
+    std::cout << frct_1.lg(epsilon) << std::endl;
+    
+    delete logger;
+}
+
 
 int main(
     int argc,

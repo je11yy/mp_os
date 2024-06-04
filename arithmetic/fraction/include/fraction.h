@@ -10,7 +10,7 @@ private:
 
     void fraction_reducing();
     int sign() const noexcept;
-    big_integer find_denominator(const fraction& a, const fraction& sec);
+    big_integer nod(big_integer a, big_integer b) const;
     int is_valid_eps(fraction const &eps) const noexcept;
     bool is_zero() const;
     fraction abs() const;
@@ -159,6 +159,10 @@ public:
 
     fraction lg(
         fraction const &epsilon) const;
+
+private:
+
+    void make_same_denominator(fraction &a, fraction &b) const;
 
 };
 
