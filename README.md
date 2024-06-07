@@ -1,7 +1,6 @@
 <head>
 </head>
 <body>
-        <h2 align="center">Ставьте звездочку, если скатали отсюда. Посмотрим, сколько нас</h2>
     <h1 align="center">Completed tasks</h1>
     <h2 align="center">MP</h2>
     <div align="center">
